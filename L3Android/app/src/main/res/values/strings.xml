@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ElKursinis</string>
+    <string name="login_btn_lt">Prisijungti</string>
+    <string name="login_btn_en">Log in</string>
+    <string name="history_en">View history</string>
+    <string name="update_btn_en">My info</string>
+</resources>
