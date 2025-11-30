@@ -1,6 +1,9 @@
 package com.example.l3web.controllers;
 
+import com.example.l3web.model.Restaurant;
 import com.example.l3web.model.User;
+import com.example.l3web.repos.BasicUserRepo;
+import com.example.l3web.repos.RestaurantRepo;
 import com.example.l3web.repos.UserRepo;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +18,20 @@ import java.util.Properties;
 public class UserController {
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private BasicUserRepo basicUserRepo;
+    @Autowired
+    private RestaurantRepo restaurantRepo;
 
 
     @GetMapping(value = "/allUsers")
     public @ResponseBody Iterable<User> getAll() {
         return userRepo.findAll();
+    }
+
+    @GetMapping(value = "/allRestaurants")
+    public @ResponseBody Iterable<Restaurant> getAllRestaurants() {
+        return restaurantRepo.findAll();
     }
 
     //Nedaryti sito produkcineje

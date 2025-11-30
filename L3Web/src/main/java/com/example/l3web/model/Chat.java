@@ -1,5 +1,6 @@
 package com.example.l3web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Chat {
     private String name;
     private String chatText;
     private LocalDate dateCreated;
+    @JsonIgnore
     @OneToOne(mappedBy = "chat", cascade = CascadeType.ALL)
     private FoodOrder foodOrder;
 

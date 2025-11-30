@@ -1,7 +1,8 @@
-package com.example.l3android;
+package com.example.l3android.activities;
 
-import static com.example.l3android.Constants.VALIDATE_USER_URL;
+import static com.example.l3android.Utils.Constants.VALIDATE_USER_URL;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.l3android.R;
+import com.example.l3android.Utils.RestOperations;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -34,19 +37,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-
     }
 
     public void validateUser(View view) {
-        TextView loginField = findViewById(R.id.loginField);
-        TextView passwordField = findViewById(R.id.passwordField);
+        TextView login = findViewById(R.id.loginField);
+        TextView password = findViewById(R.id.passwordField);
 
         Gson gson = new Gson();
-        JsonObject data = new JsonObject();
-        data.addProperty("login", loginField.getText().toString());
-        data.addProperty("password", passwordField.getText().toString());
-        String info = gson.toJson(data);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("login", login.getText().toString());
+        jsonObject.addProperty("password", password.getText().toString());
+        String info = gson.toJson(jsonObject);
 
         Executor executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -58,17 +59,21 @@ public class MainActivity extends AppCompatActivity {
                     if (!response.equals("Error") && !response.isEmpty()) {
                         Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
                         intent.putExtra("userJsonObject", response);
-                        // should parse this part if we wish to take some thingymajings from response
-                        //intent.putExtra("userID", )
+                        //??Jei noriu kazka is response paimt, man reikia parsint sia dali
+                        //intent.putExtra("userId", )
                         startActivity(intent);
                     }
                 });
-
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                //Toast reikes
             }
+
         });
 
+    }
 
+    public void loadRegWindow(View view) {
+        Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
+        startActivity(intent);
     }
 }

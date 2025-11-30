@@ -1,5 +1,6 @@
 package com.example.l3web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class Restaurant extends BasicUser {
+    @JsonIgnore
     @Transient
     private List<Cuisine> menu;
+    @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<FoodOrder> foodOrders;
 
