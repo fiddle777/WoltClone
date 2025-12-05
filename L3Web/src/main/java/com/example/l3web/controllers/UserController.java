@@ -1,11 +1,14 @@
 package com.example.l3web.controllers;
 
+import com.example.l3web.model.BasicUser;
 import com.example.l3web.model.Restaurant;
 import com.example.l3web.model.User;
 import com.example.l3web.repos.BasicUserRepo;
 import com.example.l3web.repos.RestaurantRepo;
 import com.example.l3web.repos.UserRepo;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import jakarta.persistence.Basic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,18 +40,32 @@ public class UserController {
     //Nedaryti sito produkcineje
 //    @GetMapping(value = "validateUser") // http://localhost:8080/validateUser
 //    public @ResponseBody User getUserByCredentials(@RequestParam String login, @RequestParam String password){
-//        return userRepository.getUserByLoginAndPassword(login, password);
+//        return userRepo.getUserByLoginAndPassword(login, password);
 //    }
 
     @PostMapping(value = "validateUser") //http://localhost:8080/validateUser
-    public @ResponseBody User getUserByCredentials(@RequestBody String info) {
+    public @ResponseBody String getUserByCredentials(@RequestBody String info) {
         System.out.println(info);
         //?Kaip parsint
         Gson gson = new Gson();
         Properties properties = gson.fromJson(info, Properties.class);
         var login = properties.getProperty("login");
         var psw = properties.getProperty("password");
-        return userRepo.getUserByLoginAndPassword(login, psw);
+        User user = userRepo.getUserByLoginAndPassword(login, psw);
+        if (user != null) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("userType", user.getClass().getName());
+            jsonObject.addProperty("login", user.getLogin());
+            jsonObject.addProperty("password", user.getPassword());
+            jsonObject.addProperty("name", user.getName());
+            jsonObject.addProperty("surname", user.getSurname());
+            jsonObject.addProperty("id", user.getId());
+
+            String json = gson.toJson(jsonObject);
+
+            return json;
+        }
+        return null;
     }
 
     @PutMapping(value = "updateUser")
@@ -76,6 +93,23 @@ public class UserController {
         userRepo.save(user);
         return userRepo.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
     }
+//    @PostMapping(value = "insertDriver")
+//    public @ResponseBody User createDriver(@RequestBody Driver user) {
+//        dri.save(user);
+//        return userRepo.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
+//    }
+
+    @PostMapping(value = "insertBasic")
+    public @ResponseBody User createUser(@RequestBody BasicUser user) {
+        basicUserRepo.save(user);
+        return userRepo.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
+    }
+
+    @PostMapping(value = "insertBasicUser")
+    public @ResponseBody User createBasicUser(@RequestBody BasicUser basicUser) {
+        basicUserRepo.save(basicUser);
+        return userRepo.getUserByLoginAndPassword(basicUser.getLogin(), basicUser.getPassword());
+    }
 
     @DeleteMapping(value = "deleteUser/{id}")
     public @ResponseBody String deleteUser(@PathVariable int id) {
@@ -88,5 +122,4 @@ public class UserController {
         }
 
     }
-
 }

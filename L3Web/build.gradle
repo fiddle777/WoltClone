@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'kursinisBackend'
+description = 'l3web'
 
 java {
     toolchain {
@@ -33,7 +33,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    // https://mvnRepo.com/artifact/com.google.code.gson/gson
     implementation("com.google.code.gson:gson:2.7")
 }
 

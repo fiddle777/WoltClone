@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,8 +16,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.l3android.R;
-import com.example.l3android.Utils.LocalDateTimeDeserializer;
-import com.example.l3android.Utils.LocalDateTimeSerializer;
+import com.example.l3android.Utils.LocalDateTimeAdapter;
 import com.example.l3android.Utils.RestOperations;
 import com.example.l3android.model.Driver;
 import com.example.l3android.model.Restaurant;
@@ -35,6 +33,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class WoltRestaurants extends AppCompatActivity {
+
+    User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +54,13 @@ public class WoltRestaurants extends AppCompatActivity {
 
 
         GsonBuilder build = new GsonBuilder();
-        build.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
+        build.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         Gson gson = build.setPrettyPrinting().create();
-        var connectedUser = gson.fromJson(userInfo, User.class);
+        currentUser = gson.fromJson(userInfo, User.class);
 
-        if (connectedUser instanceof Driver) {
+        if (currentUser instanceof Driver) {
 
-        } else if (connectedUser instanceof Restaurant) {
+        } else if (currentUser instanceof Restaurant) {
             //net neleisim sito
         } else {
             Executor executor = Executors.newSingleThreadExecutor();
@@ -76,8 +76,7 @@ public class WoltRestaurants extends AppCompatActivity {
                                 //Cia yra dalis, kaip is json, kuriame yra [{},{}, {},...] paversti i List is Restoranu
 
                                 GsonBuilder gsonBuilder = new GsonBuilder();
-//                                gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
-                                gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer());
+                                gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
                                 Gson gsonRestaurants = gsonBuilder.setPrettyPrinting().create();
                                 Type restaurantListType = new TypeToken<List<Restaurant>>() {
                                 }.getType();
@@ -86,14 +85,14 @@ public class WoltRestaurants extends AppCompatActivity {
 
                                 //Reikia tuos duomenis, kuriuos ka tik isparsinau is json, atvaizduoti grafiniam elemente
                                 ListView restaurantListElement = findViewById(R.id.restaurantList);
-                                //Beda - man butinai reikia nurodyti koks layout ir ka idet t.y. duomenis
-                                ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, restaurantListFromJson);
+                                RestaurantAdapter adapter = new RestaurantAdapter(this, restaurantListFromJson);
                                 restaurantListElement.setAdapter(adapter);
 
                                 restaurantListElement.setOnItemClickListener((parent, view, position, id) -> {
-                                    //Sioje vietoje noresiu atidaryti nauja activity
-                                    System.out.println(restaurantListFromJson.get(position));
+                                    Restaurant selectedRestaurant = restaurantListFromJson.get(position);
                                     Intent intentMenu = new Intent(WoltRestaurants.this, MenuActivity.class);
+                                    intentMenu.putExtra("restaurantId", selectedRestaurant.getId());
+                                    intentMenu.putExtra("userId", currentUser.getId());
                                     startActivity(intentMenu);
                                 });
 
@@ -107,16 +106,17 @@ public class WoltRestaurants extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
             });
-
-
         }
-
 
     }
 
     public void viewPurchaseHistory(View view) {
+        Intent intent = new Intent(WoltRestaurants.this, MyOrders.class);
+        intent.putExtra("id", currentUser.getId());
+        startActivity(intent);
     }
 
     public void viewMyAccount(View view) {
+        //Arba naujas activity arba fragmentas - account redagavimo forma
     }
 }

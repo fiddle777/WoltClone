@@ -1,11 +1,9 @@
 package com.example.l3android.model;
 
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
-//@MappedSuperclass
 public class User implements Serializable {
     protected int id;
     protected String login;
@@ -44,68 +42,68 @@ public class User implements Serializable {
         return id;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public LocalDateTime getDateCreated() {
-        return dateCreated;
-    }
-
-    public LocalDateTime getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public boolean isAdmin() {
-        return isAdmin;
-    }
-
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getLogin() {
+        return login;
     }
 
     public void setLogin(String login) {
         this.login = login;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getSurname() {
+        return surname;
+    }
+
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated = dateCreated;
     }
 
+    public LocalDateTime getDateUpdated() {
+        return dateUpdated;
+    }
+
     public void setDateUpdated(LocalDateTime dateUpdated) {
         this.dateUpdated = dateUpdated;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
     public void setAdmin(boolean admin) {

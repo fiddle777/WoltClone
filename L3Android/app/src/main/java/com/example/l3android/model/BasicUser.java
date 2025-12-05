@@ -1,8 +1,10 @@
 package com.example.l3android.model;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class BasicUser extends User{
     protected String address;
@@ -19,6 +21,7 @@ public class BasicUser extends User{
         super(login, password, name, surname, phoneNumber);
         this.address = address;
     }
+
     public String getAddress() {
         return address;
     }

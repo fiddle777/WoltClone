@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.CheckBox;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,8 +19,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.l3android.R;
 import com.example.l3android.Utils.RestOperations;
 import com.example.l3android.model.BasicUser;
-import com.example.l3android.activities.MainActivity;
-
 import com.google.gson.Gson;
 
 import org.w3c.dom.Text;
@@ -55,7 +52,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         //Patikrinti, ar buvo pasirinktas driver ar ne
         String userInfo = "{}";
-        if (((CheckBox) findViewById(R.id.regIsDriver)).isChecked()) {
+        if (findViewById(R.id.regIsDriver).isActivated()) {
             //Kurt driver
         } else {
 

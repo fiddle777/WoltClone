@@ -1,6 +1,5 @@
 package com.example.l3android.model;
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

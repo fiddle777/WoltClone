@@ -1,5 +1,6 @@
 package com.example.l3web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,9 +21,20 @@ public class Review {
     private int rating;
     private String reviewText;
     private LocalDate dateCreated;
+    @JsonIgnore
     @ManyToOne
     private BasicUser commentOwner;
+    @JsonIgnore
     @ManyToOne
     private BasicUser feedbackUser;
+    @JsonIgnore
+    @ManyToOne
+    private Chat chat;
 
+    public Review(String reviewText, BasicUser commentOwner, Chat chat) {
+        this.reviewText = reviewText;
+        this.commentOwner = commentOwner;
+        this.chat = chat;
+        this.dateCreated = LocalDate.now();
+    }
 }

@@ -29,4 +29,8 @@ public class Cuisine {
     @ManyToMany(mappedBy = "cuisineList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<FoodOrder> orderList;
 
+    @JsonIgnore
+    @ManyToOne
+    private Restaurant restaurant;
+
 }
