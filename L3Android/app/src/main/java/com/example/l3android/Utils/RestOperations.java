@@ -3,11 +3,13 @@ package com.example.l3android.Utils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class RestOperations {
 
@@ -57,38 +59,53 @@ public class RestOperations {
         }
     }
 
-    public static String sendPost(String urlPost, String postDataParams) throws IOException {
-        URL url = new URL(urlPost);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setRequestMethod("POST");
-        httpURLConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-        httpURLConnection.setReadTimeout(15000);
-        httpURLConnection.setConnectTimeout(15000);
-        httpURLConnection.setRequestProperty("Accept", "application/json");
-        httpURLConnection.setDoInput(true);
-        httpURLConnection.setDoOutput(true);
+    public static String sendPost(String urlString, String jsonPayload) throws IOException {
+        System.out.println("POST URL: " + urlString);
+        System.out.println("Payload: " + jsonPayload);
 
-        OutputStream outputStream = httpURLConnection.getOutputStream();
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-        bufferedWriter.write(postDataParams);
-        bufferedWriter.close();
-        outputStream.close();
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("Accept", "application/json");
 
-        int code = httpURLConnection.getResponseCode();
-        System.out.println("Resonse code get " + code);
-
-        if (code == HttpURLConnection.HTTP_OK) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                response.append(line);
+            byte[] out = jsonPayload.getBytes(StandardCharsets.UTF_8);
+            conn.setFixedLengthStreamingMode(out.length);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(out);
             }
-            in.close();
-            return response.toString();
-        } else {
-            return "Error";
+
+            int status = conn.getResponseCode();
+            System.out.println("Response code get " + status);
+
+            InputStream is = (status >= 200 && status < 400) ? conn.getInputStream() : conn.getErrorStream();
+            String body = readStream(is);
+            System.out.println("Response body: " + body);
+
+            if (status >= 200 && status < 300) {
+                return body == null ? "" : body;
+            } else {
+                return "Error";
+            }
+        } finally {
+            if (conn != null) conn.disconnect();
         }
+    }
+    private static String readStream(InputStream is) throws IOException {
+        if (is == null) return null;
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+        return sb.toString();
     }
 
     public static String sendPut(String urlPut, String postDataParams) throws IOException {

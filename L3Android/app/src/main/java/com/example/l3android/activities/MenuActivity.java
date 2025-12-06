@@ -162,9 +162,18 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnQua
                 itemsArray.add(itemJson);
             }
         }
-        orderJson.add("items", itemsArray);
 
+        // ensure we aren't sending an empty items array
+        if (itemsArray.size() == 0) {
+            Toast.makeText(this, "No valid items to order (check IDs/quantities)", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        orderJson.add("items", itemsArray);
         String orderData = gson.toJson(orderJson);
+
+        // Debug output
+        System.out.println("Order payload: " + orderData);
 
         Executor executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -173,17 +182,19 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnQua
             try {
                 String response = RestOperations.sendPost(CREATE_ORDER, orderData);
                 System.out.println("Order response: " + response);
+
                 handler.post(() -> {
-                    if (!response.equals("Error") && !response.isEmpty()) {
+                    // null/empty safe check
+                    if (response != null && !response.equals("Error") && !android.text.TextUtils.isEmpty(response)) {
                         Toast.makeText(this, "Order placed successfully!", Toast.LENGTH_SHORT).show();
-                        // Clear the cart
                         menuAdapter.getQuantities().clear();
                         menuAdapter.notifyDataSetChanged();
                         updateOrderSummary();
-                        // Optionally go back to restaurants list
                         finish();
                     } else {
-                        Toast.makeText(this, "Failed to place order", Toast.LENGTH_SHORT).show();
+                        // Show server response for debugging
+                        String debugMsg = (response == null) ? "no response" : response;
+                        Toast.makeText(this, "Failed to place order: " + debugMsg, Toast.LENGTH_LONG).show();
                     }
                 });
             } catch (IOException e) {

@@ -117,6 +117,8 @@ public class WoltRestaurants extends AppCompatActivity {
     }
 
     public void viewMyAccount(View view) {
-        //Arba naujas activity arba fragmentas - account redagavimo forma
+        Intent intent = new Intent(WoltRestaurants.this, MyInfoActivity.class);
+        intent.putExtra("userJson", new Gson().toJson(currentUser));
+        startActivity(intent);
     }
 }

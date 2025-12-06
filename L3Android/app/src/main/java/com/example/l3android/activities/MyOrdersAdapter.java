@@ -23,27 +23,56 @@ public class MyOrdersAdapter extends ArrayAdapter<FoodOrder> {
 
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public View getView(int position,
+                        @Nullable View convertView,
+                        @NonNull ViewGroup parent) {
+
         View view = convertView;
         if (view == null) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.item_order, parent, false);
+            view = LayoutInflater.from(getContext())
+                    .inflate(R.layout.item_order, parent, false);
         }
 
         FoodOrder order = getItem(position);
 
         TextView restaurantLabel = view.findViewById(R.id.orderRestaurant);
         TextView orderTitle = view.findViewById(R.id.orderTitle);
+        TextView orderDate = view.findViewById(R.id.orderDate);
+        TextView orderItems = view.findViewById(R.id.orderItems);
         TextView orderPrice = view.findViewById(R.id.orderPrice);
 
         if (order != null) {
-//            String restaurantName = order.getRestaurantName();
-//            // Fallback to order name if restaurant name is not present
-//            restaurantLabel.setText(restaurantName != null && !restaurantName.isEmpty()
-//                    ? restaurantName
-//                    : order.getName());
+            // Restaurant name
+            if (order.getRestaurantName() != null) {
+                restaurantLabel.setText(order.getRestaurantName());
+            } else {
+                restaurantLabel.setText("Unknown restaurant");
+            }
 
+            // Title: Order #ID
             orderTitle.setText("Order #" + order.getId());
 
+            // Date
+            String rawDate = order.getDateCreated();
+            if (rawDate != null && !rawDate.isEmpty()) {
+                String displayDate = rawDate.replace('T', ' ');
+                int dotIndex = displayDate.indexOf('.');
+                if (dotIndex > 0) {
+                    displayDate = displayDate.substring(0, dotIndex);
+                }
+                orderDate.setText(displayDate);
+            } else {
+                orderDate.setText("Date unknown");
+            }
+
+            // Items summary
+            if (order.getItemsSummary() != null && !order.getItemsSummary().isEmpty()) {
+                orderItems.setText(order.getItemsSummary());
+            } else {
+                orderItems.setText("No items visible");
+            }
+
+            // Price
             if (order.getPrice() != null) {
                 orderPrice.setText("€" + String.format("%.2f", order.getPrice()));
             } else {

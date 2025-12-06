@@ -24,8 +24,18 @@
             android:name=".activities.WoltRestaurants"
             android:exported="false" />
         <activity
+            android:name=".activities.MyOrders"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ChatSystem"
+            android:exported="false" />
+        <activity
             android:name=".activities.RegistrationActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.MyInfoActivity"
+            android:exported="false" />
+
         <activity
             android:name=".activities.MainActivity"
             android:exported="true">

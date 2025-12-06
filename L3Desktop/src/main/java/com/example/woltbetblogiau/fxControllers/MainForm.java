@@ -19,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.net.URL;
@@ -183,28 +184,9 @@ public class MainForm implements Initializable {
             }
         });
 
-        clientList.setCellFactory(cb -> new ListCell<BasicUser>() {
-            @Override
-            protected void updateItem(BasicUser it, boolean empty) {
-                super.updateItem(it, empty);
-                if (empty || it == null) {
-                    setText(null);
-                    return;
-                }
-                setText(it.getName() + " " + it.getSurname() + " (" + it.getLogin() + ")");
-            }
-        });
-        clientList.setButtonCell(new ListCell<BasicUser>() {
-            @Override
-            protected void updateItem(BasicUser it, boolean empty) {
-                super.updateItem(it, empty);
-                if (empty || it == null) {
-                    setText(null);
-                    return;
-                }
-                setText(it.getName() + " " + it.getSurname() + " (" + it.getLogin() + ")");
-            }
-        });
+        if (clientList != null) {
+            setupClientList();
+        }
 
         restaurantField.setCellFactory(cb -> new ListCell<Restaurant>() {
             @Override
@@ -316,13 +298,36 @@ public class MainForm implements Initializable {
         //pabaigt
     }
     private void clearAllOrderFields() {
-        //turbut reik salygos sakiniu
-        ordersList.getItems().clear();
-        basicUserList.getItems().clear();
-        clientList.getItems().clear();
-        restaurantField.getItems().clear();
-        titleField.clear();
-        priceField.clear();
+        if (ordersList != null) {
+            ordersList.getItems().clear();
+            ordersList.getSelectionModel().clearSelection();
+        }
+        if (basicUserList != null) {
+            basicUserList.getItems().clear();
+            basicUserList.getSelectionModel().clearSelection();
+        }
+        if (clientList != null) {
+            clientList.getItems().clear();
+            clientList.getSelectionModel().clearSelection();
+            clientList.setValue(null);
+        }
+        if (restaurantField != null) {
+            restaurantField.getItems().clear();
+            restaurantField.getSelectionModel().clearSelection();
+            restaurantField.setValue(null);
+        }
+        if (foodList != null) {
+            foodList.getSelectionModel().clearSelection();
+            // keep menu population separate (loadRestaurantMenu / loadRestaurantMenuForOrder)
+        }
+        if (orderStatusField != null) orderStatusField.getSelectionModel().clearSelection();
+        if (filterStatus != null) filterStatus.getSelectionModel().clearSelection();
+        if (filterClients != null) filterClients.getSelectionModel().clearSelection();
+        if (filterFrom != null) filterFrom.setValue(null);
+        if (filterTo != null) filterTo.setValue(null);
+
+        if (titleField != null) titleField.clear();
+        if (priceField != null) priceField.clear();
     }
     private void clearAllCuisineFields() {
         foodList.getItems().clear();
@@ -559,6 +564,47 @@ public class MainForm implements Initializable {
         if (restaurant != null) {
             foodList.getItems().addAll(customHibernate.getRestaurantCuisine(restaurant));
         }
+    }
+    private void setupClientList() {
+        if (clientList == null) return;
+
+        clientList.setPromptText("Select client");
+
+        clientList.setCellFactory(cb -> new ListCell<BasicUser>() {
+            @Override
+            protected void updateItem(BasicUser it, boolean empty) {
+                super.updateItem(it, empty);
+                if (empty || it == null) {
+                    setText(null);
+                } else {
+                    setText(it.getName() + " " + it.getSurname() + " (" + it.getLogin() + ")");
+                }
+            }
+        });
+
+        clientList.setButtonCell(new ListCell<BasicUser>() {
+            @Override
+            protected void updateItem(BasicUser it, boolean empty) {
+                super.updateItem(it, empty);
+                if (empty || it == null) {
+                    setText(null);
+                } else {
+                    setText(it.getName() + " " + it.getSurname() + " (" + it.getLogin() + ")");
+                }
+            }
+        });
+
+        clientList.setConverter(new StringConverter<BasicUser>() {
+            @Override
+            public String toString(BasicUser u) {
+                return u == null ? "" : u.getName() + " " + u.getSurname() + " (" + u.getLogin() + ")";
+            }
+            @Override
+            public BasicUser fromString(String string) {
+                // Not used for non-editable combo; return null
+                return null;
+            }
+        });
     }
     //</editor-fold>
 

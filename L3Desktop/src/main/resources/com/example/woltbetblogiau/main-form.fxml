@@ -4,7 +4,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
@@ -58,18 +57,16 @@
                                 <Button layoutX="248.0" layoutY="320.0" mnemonicParsing="false" onAction="#createOrder" text="New" />
                                 <Button layoutX="371.0" layoutY="320.0" mnemonicParsing="false" onAction="#updateOrder" text="Update" />
                                 <Button layoutX="504.0" layoutY="320.0" mnemonicParsing="false" onAction="#deleteOrder" text="Delete" />
-                                <TextField fx:id="titleField" layoutX="238.0" layoutY="104.0" promptText="Order Name" />
-                                <ComboBox fx:id="clientList" layoutX="237.0" layoutY="65.0" prefWidth="150.0" promptText="Select Client" />
-                                <TextField fx:id="priceField" layoutX="238.0" layoutY="141.0" promptText="Order Price" />
-                                <ComboBox fx:id="restaurantField" layoutX="238.0" layoutY="184.0" onAction="#loadRestaurantMenuForOrder" prefWidth="150.0" promptText="Restaurant" />
-                                <ListView fx:id="basicUserList" layoutX="399.0" layoutY="63.0" prefHeight="203.0" prefWidth="192.0" AnchorPane.leftAnchor="399.0" AnchorPane.rightAnchor="232.0" />
-                                <ComboBox fx:id="orderStatusField" layoutX="238.0" layoutY="227.0" prefWidth="150.0" promptText="Order Status" />
+                                <TextField fx:id="titleField" layoutX="649.0" layoutY="106.0" promptText="Order Name" />
+                                <ComboBox fx:id="clientList" layoutX="648.0" layoutY="67.0" prefWidth="150.0" promptText="Select Client" />
+                                <TextField fx:id="priceField" layoutX="649.0" layoutY="143.0" promptText="Order Price" />
+                                <ComboBox fx:id="restaurantField" layoutX="649.0" layoutY="186.0" onAction="#loadRestaurantMenuForOrder" prefWidth="150.0" promptText="Restaurant" />
+                                <ListView fx:id="basicUserList" layoutX="220.0" layoutY="65.0" prefHeight="203.0" prefWidth="192.0" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="411.0" />
+                                <ComboBox fx:id="orderStatusField" layoutX="605.0" layoutY="438.0" prefWidth="150.0" promptText="Order Status" />
                                 <ComboBox fx:id="filterStatus" layoutX="14.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filder Order Status" />
                                 <ComboBox fx:id="filterClients" layoutX="173.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filter Clients" />
-                                <DatePicker fx:id="filterFrom" layoutX="330.0" layoutY="21.0" onAction="#filterOrders" prefHeight="25.0" prefWidth="126.0" promptText="Date From" />
-                                <DatePicker fx:id="filterTo" layoutX="462.0" layoutY="21.0" onAction="#filterOrders" prefHeight="25.0" prefWidth="130.0" promptText="Date To" />
-                                <ListView fx:id="foodList" layoutX="589.0" layoutY="65.0" prefHeight="200.0" prefWidth="220.0" AnchorPane.leftAnchor="589.0" AnchorPane.rightAnchor="14.0" />
-                                <Button layoutX="504.0" layoutY="285.0" mnemonicParsing="false" onAction="#loadChatForm" text="View chat" />
+                                <ListView fx:id="foodList" layoutX="417.0" layoutY="67.0" prefHeight="200.0" prefWidth="220.0" AnchorPane.leftAnchor="417.0" AnchorPane.rightAnchor="186.0" />
+                                <Button layoutX="649.0" layoutY="242.0" mnemonicParsing="false" onAction="#loadChatForm" text="View chat" />
                             </children></AnchorPane>
                     </content>
                 </Tab>

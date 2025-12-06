@@ -11,6 +11,7 @@ module com.example.courseprifs {
     requires com.dlsc.formsfx;
     requires org.kordamp.bootstrapfx.core;
     requires javafx.graphics;
+    requires javafx.base;
 
     opens com.example.woltbetblogiau to javafx.fxml, org.hibernate.orm.core, jakarta.persistence;
     exports com.example.woltbetblogiau;
