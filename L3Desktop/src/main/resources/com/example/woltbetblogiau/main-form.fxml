@@ -68,8 +68,9 @@
                                 <ComboBox fx:id="filterClients" layoutX="173.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filter Clients" />
                                 <ListView fx:id="foodList" layoutX="417.0" layoutY="67.0" prefHeight="200.0" prefWidth="220.0" AnchorPane.leftAnchor="417.0" AnchorPane.rightAnchor="186.0" />
                                 <Button layoutX="649.0" layoutY="242.0" mnemonicParsing="false" onAction="#loadChatForm" text="View chat" />
-                        <DatePicker fx:id="dateFilterFrom" layoutX="339.0" layoutY="21.0" />
-                        <DatePicker fx:id="DateFilterTo" layoutX="518.0" layoutY="21.0" />
+                        <DatePicker fx:id="dateFilterFrom" layoutX="498.0" layoutY="21.0" prefHeight="25.0" prefWidth="150.0" />
+                        <DatePicker fx:id="DateFilterTo" layoutX="660.0" layoutY="21.0" prefHeight="25.0" prefWidth="154.0" />
+                        <ComboBox fx:id="filterRestaurants" layoutX="337.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filter Restaurants" />
                             </children></AnchorPane>
                     </content>
                 </Tab>

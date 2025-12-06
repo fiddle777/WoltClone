@@ -33,6 +33,12 @@ public class FoodOrder {
     private LocalDate dateCreated;
     private LocalDate dateUpdated;
 
+    private String restaurantName;
+    @Column(length = 1000)
+    private String itemsSummary;
+    @ManyToOne
+    private Driver driver;
+
     public FoodOrder(String name, Double price, BasicUser buyer, Restaurant restaurant) {
         this.name = name;
         this.price = price;

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.woltbetblogiau.fxControllers.OrderForm">
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+            </padding>
+
+            <children>
+                <Label fx:id="orderIdLabel" text="Order #?" />
+
+                <Label text="Name:" />
+                <TextField fx:id="orderNameField" />
+
+                <Label text="Total price:" />
+                <TextField fx:id="orderPriceField" />
+
+                <Label text="Items quantities:" />
+                <TextArea fx:id="itemsSummaryArea" prefRowCount="4" />
+
+                <Label text="Status:" />
+                <ComboBox fx:id="statusField" />
+
+                <Label text="Driver:" />
+                <ComboBox fx:id="driverField" />
+
+                <HBox spacing="10">
+                    <children>
+                        <Button text="Save" onAction="#save" />
+                        <Button text="Cancel" onAction="#cancel" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

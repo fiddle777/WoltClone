@@ -72,6 +72,7 @@ public class MainForm implements Initializable {
     public DatePicker filterFrom;
     public DatePicker filterTo;
     public ListView<Cuisine> foodList;
+    public ComboBox<Restaurant> filterRestaurants;
     //</editor-fold>
     //<editor-fold desc="Cuisine Tab Elements">
     public TextField titleCuisineField;
@@ -213,7 +214,7 @@ public class MainForm implements Initializable {
             }
         });
 
-        foodList.setCellFactory(lv -> new ListCell<Cuisine>() {
+        foodList.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(Cuisine it, boolean empty) {
                 super.updateItem(it, empty);
@@ -221,9 +222,14 @@ public class MainForm implements Initializable {
                     setText(null);
                     return;
                 }
-                setText(it.getName() + " • " + it.getPrice());
+                if (it.getPrice() != null) {
+                    setText(it.getName() + " • " + it.getPrice());
+                } else {
+                    setText(it.getName());
+                }
             }
         });
+
 
         cuisineList.setCellFactory(lv -> new ListCell<Cuisine>() {
             @Override
@@ -458,33 +464,36 @@ public class MainForm implements Initializable {
     }
 
     public void updateOrder() {
-        FoodOrder foodOrder = ordersList.getSelectionModel().getSelectedItem();
-        if (foodOrder == null) {
+        FoodOrder selectedOrder = ordersList.getSelectionModel().getSelectedItem();
+        if (selectedOrder == null) {
             new Alert(Alert.AlertType.WARNING, "Select an order to update.").showAndWait();
             return;
         }
-        if (!isNumeric(priceField.getText())) {
-            new Alert(Alert.AlertType.WARNING, "Enter a valid price.").showAndWait();
-            return;
+
+        try {
+            FXMLLoader fxmlLoader =
+                    new FXMLLoader(HelloApplication.class.getResource("order-form.fxml"));
+            Parent parent = fxmlLoader.load();
+
+            OrderForm controller = fxmlLoader.getController();
+            controller.setData(customHibernate, selectedOrder);
+
+            Stage stage = new Stage();
+            stage.setTitle("Edit order #" + selectedOrder.getId());
+            stage.setScene(new Scene(parent));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            // refresher
+            helperPopulateManagementTab();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Failed to open order editor: " + e.getMessage())
+                    .showAndWait();
         }
-        if (clientList.getSelectionModel().getSelectedItem() == null ||
-                restaurantField.getSelectionModel().getSelectedItem() == null) {
-            new Alert(Alert.AlertType.WARNING, "Select client and restaurant.").showAndWait();
-            return;
-        }
-        foodOrder.setName(titleField.getText());
-        foodOrder.setPrice(Double.valueOf(priceField.getText()));
-        foodOrder.setBuyer(clientList.getSelectionModel().getSelectedItem());
-        foodOrder.setRestaurant(restaurantField.getSelectionModel().getSelectedItem());
-        if (orderStatusField.getValue() != null) {
-            foodOrder.setStatus(orderStatusField.getValue());
-        }
-        List<Cuisine> selectedFood = new ArrayList<>(foodList.getSelectionModel().getSelectedItems());
-        foodOrder.setCuisineList(selectedFood);
-        customHibernate.update(foodOrder);
-        fillOrderLists();
-        new Alert(Alert.AlertType.INFORMATION, "Order updated.").showAndWait();
     }
+
 
     public void deleteOrder() {
         FoodOrder selectedOrder = ordersList.getSelectionModel().getSelectedItem();
@@ -526,16 +535,27 @@ public class MainForm implements Initializable {
                     .ifPresent(c -> clientList.getSelectionModel().select(c));
         }
 
-        foodList.getSelectionModel().clearSelection();
-        if (selectedOrder.getCuisineList() != null) {
-            for (Cuisine c : selectedOrder.getCuisineList()) {
-                for (int i = 0; i < foodList.getItems().size(); i++) {
-                    if (foodList.getItems().get(i).getId() == c.getId()) {
-                        foodList.getSelectionModel().select(i);
-                    }
-                }
+        foodList.getItems().clear();
+
+        // Preferred path – backend orders with itemsSummary string
+        if (selectedOrder.getItemsSummary() != null &&
+                !selectedOrder.getItemsSummary().isBlank()) {
+
+            String[] parts = selectedOrder.getItemsSummary().split(",");
+            for (String part : parts) {
+                String itemText = part.trim();
+                // light Cuisine just for display
+                Cuisine pseudo = new Cuisine(itemText, "", null, false, false, null);
+                foodList.getItems().add(pseudo);
             }
+
+            //Fallback – old desktop-created orders that still use cuisineList
+        } else if (selectedOrder.getCuisineList() != null &&
+                !selectedOrder.getCuisineList().isEmpty()) {
+
+            foodList.getItems().setAll(selectedOrder.getCuisineList());
         }
+
 
         if (selectedOrder.getStatus() != null) {
             orderStatusField.getSelectionModel().select(selectedOrder.getStatus());
@@ -560,18 +580,15 @@ public class MainForm implements Initializable {
                 ? filterClients.getSelectionModel().getSelectedItem()
                 : null;
 
-        LocalDate start = null;
-        LocalDate end = null;
-
-        if (filterFrom != null) {
-            start = filterFrom.getValue();
-        }
-        if (filterTo != null) {
-            end = filterTo.getValue();
-        }
+        LocalDate start = (filterFrom != null) ? filterFrom.getValue() : null;
+        LocalDate end   = (filterTo   != null) ? filterTo.getValue()   : null;
 
         Restaurant restaurant = null;
-        if (currentUser instanceof Restaurant) {
+
+        if (filterRestaurants != null &&
+                filterRestaurants.getSelectionModel().getSelectedItem() != null) {
+            restaurant = filterRestaurants.getSelectionModel().getSelectedItem();
+        } else if (currentUser instanceof Restaurant) {
             restaurant = (Restaurant) currentUser;
         }
 
@@ -579,6 +596,7 @@ public class MainForm implements Initializable {
                 customHibernate.getFilteredRestaurantOrders(status, client, start, end, restaurant);
         ordersList.getItems().setAll(filteredOrders);
     }
+
 
 
     public void loadRestaurantMenuForOrder() {
@@ -740,25 +758,42 @@ public class MainForm implements Initializable {
     //</editor-fold>
     private void helperPopulateManagementTab() {
         clearAllOrderFields();
+
         List<FoodOrder> foodOrders = getFoodOrders();
         ordersList.getItems().setAll(foodOrders);
-        List<BasicUser> clients = customHibernate.getAllBasicUsers();
-        clientList.getItems().setAll(clients);
-        basicUserList.getItems().setAll(clients);
-        restaurantField.getItems().setAll(customHibernate.getAllRecords(Restaurant.class));
+
+        List<BasicUser> allClients = customHibernate.getAllBasicUsers();
+        clientList.getItems().setAll(allClients);
+
+        restaurantField.getItems()
+                .setAll(customHibernate.getAllRecords(Restaurant.class));
+
         orderStatusField.getItems().setAll(OrderStatus.values());
         filterStatus.getItems().setAll(OrderStatus.values());
 
-        // Filter clients
         List<BasicUser> distinctBuyers = foodOrders.stream()
                 .map(FoodOrder::getBuyer)
                 .filter(b -> b != null)
                 .collect(java.util.stream.Collectors.collectingAndThen(
-                        java.util.stream.Collectors.toMap(BasicUser::getId, b -> b, (a,b) -> a),
-                        m -> new ArrayList<>(m.values())
+                        java.util.stream.Collectors.toMap(BasicUser::getId, b -> b, (a, b) -> a),
+                        m -> new java.util.ArrayList<>(m.values())
                 ));
+
         filterClients.getItems().setAll(distinctBuyers);
+        basicUserList.getItems().setAll(distinctBuyers);
+
+        if (filterRestaurants != null) {
+            List<Restaurant> distinctRestaurants = foodOrders.stream()
+                    .map(FoodOrder::getRestaurant)
+                    .filter(r -> r != null)
+                    .collect(java.util.stream.Collectors.collectingAndThen(
+                            java.util.stream.Collectors.toMap(Restaurant::getId, r -> r, (a, b) -> a),
+                            m -> new java.util.ArrayList<>(m.values())
+                    ));
+            filterRestaurants.getItems().setAll(distinctRestaurants);
+        }
     }
+
 
     public void deleteCuisine(ActionEvent actionEvent) {
         Cuisine cuisine = cuisineList.getSelectionModel().getSelectedItem();
