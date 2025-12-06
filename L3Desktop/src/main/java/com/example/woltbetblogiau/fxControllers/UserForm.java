@@ -142,27 +142,118 @@ public class UserForm implements Initializable {
     }
 
     public void updateUser(ActionEvent actionEvent) {
-        if(userForUpdate == null) return;
-            userForUpdate.setLogin(usernameField.getText());
-            userForUpdate.setPassword(passwordField.getText());
-            userForUpdate.setName(nameField.getText());
-            userForUpdate.setPhoneNumber(phoneField.getText());
-        try{
-            if(userForUpdate instanceof User){
-                if (userForUpdate instanceof Restaurant) {
-                    Restaurant restaurant = (Restaurant) userForUpdate;
-                    restaurant.setAddress(addressField.getText());
-                } else {
-                    userForUpdate.setSurname(surnameField.getText());
-            }
+        if (userForUpdate == null) return;
+
+        String login    = usernameField.getText();
+        String password = passwordField.getText();
+        String name     = nameField.getText();
+        String surname  = surnameField.getText();
+        String phone    = phoneField.getText();
+        String address  = addressField.getText();
+
+        try {
+            boolean typeChanged = false;
+
+            // Check if selected type matches current entity type
+            if (userRadio.isSelected() && !(userForUpdate instanceof BasicUser)) {
+                userForUpdate.setLogin(login);
+                userForUpdate.setPassword(password);
+                userForUpdate.setName(name);
+                userForUpdate.setSurname(surname);
+                userForUpdate.setPhoneNumber(phone);
+
                 genericHibernate.update(userForUpdate);
-                new Alert(Alert.AlertType.INFORMATION, "User successfully updated!").showAndWait();
-                ((Button) actionEvent.getSource()).getScene().getWindow().hide();
-        }
-    } catch (Exception e){
+
+            } else if (clientRadio.isSelected()
+                    && (userForUpdate instanceof BasicUser)
+                    && !(userForUpdate instanceof Driver)
+                    && !(userForUpdate instanceof Restaurant)) {
+
+                BasicUser basicUser = (BasicUser) userForUpdate;
+                basicUser.setLogin(login);
+                basicUser.setPassword(password);
+                basicUser.setName(name);
+                basicUser.setSurname(surname);
+                basicUser.setPhoneNumber(phone);
+                basicUser.setAddress(address);
+
+                genericHibernate.update(basicUser);
+
+            } else if (restaurantRadio.isSelected()
+                    && (userForUpdate instanceof Restaurant)) {
+
+                Restaurant restaurant = (Restaurant) userForUpdate;
+                restaurant.setLogin(login);
+                restaurant.setPassword(password);
+                restaurant.setName(name);
+                restaurant.setPhoneNumber(phone);
+                restaurant.setAddress(address);
+
+                genericHibernate.update(restaurant);
+
+            } else if (driverRadio.isSelected()
+                    && (userForUpdate instanceof Driver)) {
+
+                Driver driver = (Driver) userForUpdate;
+                driver.setLogin(login);
+                driver.setPassword(password);
+                driver.setName(name);
+                driver.setSurname(surname);
+                driver.setPhoneNumber(phone);
+                driver.setAddress(address);
+
+                genericHibernate.update(driver);
+
+            } else {
+                // Type actually changed – delete old entity and create a new one
+                typeChanged = true;
+                int oldId = userForUpdate.getId();
+
+                // delete old
+                genericHibernate.delete(User.class, oldId);
+
+                // create new according to selected radio
+                if (userRadio.isSelected()) {
+                    User newUser = new User(login, password, name, surname, phone);
+                    genericHibernate.create(newUser);
+
+                } else if (clientRadio.isSelected()) {
+                    BasicUser newBasic = new BasicUser(login, password, name, surname, phone, address);
+                    genericHibernate.create(newBasic);
+
+                } else if (restaurantRadio.isSelected()) {
+                    Restaurant newRest = new Restaurant(login, password, name, surname, phone, address);
+                    genericHibernate.create(newRest);
+
+                } else if (driverRadio.isSelected()) {
+                    // still using placeholder licence/bDate like in createNewUser()
+                    Driver newDriver = new Driver(
+                            login,
+                            password,
+                            name,
+                            surname,
+                            phone,
+                            address,
+                            "SampleLicence",
+                            LocalDate.of(1969, 4, 20),
+                            VehicleType.SCOOTER
+                    );
+                    genericHibernate.create(newDriver);
+                }
+            }
+
+            new Alert(Alert.AlertType.INFORMATION,
+                    typeChanged ? "User type changed and user updated!"
+                            : "User successfully updated!")
+                    .showAndWait();
+
+            ((Button) actionEvent.getSource()).getScene().getWindow().hide();
+
+        } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error updating user: " + e.getMessage()).showAndWait();
         }
     }
+
 
     public void backToLoginForm(ActionEvent actionEvent) {
         try{

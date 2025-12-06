@@ -69,7 +69,8 @@ public class DriverOrdersActivity extends AppCompatActivity {
                         Type listType = new TypeToken<List<FoodOrder>>() {}.getType();
                         List<FoodOrder> orders = new Gson().fromJson(response, listType);
 
-                        DriverOrdersAdapter adapter = new DriverOrdersAdapter(this, orders);
+                        DriverOrdersAdapter adapter = new DriverOrdersAdapter(this, orders, DriverOrdersAdapter.Mode.MY_DELIVERIES,
+                                driverId);
                         listView.setAdapter(adapter);
                     } catch (Exception e) {
                         e.printStackTrace();

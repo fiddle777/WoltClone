@@ -1,7 +1,6 @@
 package com.example.l3android.activities;
 
 import static com.example.l3android.Utils.Constants.GET_AVAILABLE_ORDERS;
-import static com.example.l3android.Utils.Constants.ASSIGN_ORDER_TO_DRIVER;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import com.example.l3android.R;
 import com.example.l3android.Utils.RestOperations;
 import com.example.l3android.model.FoodOrder;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -30,6 +28,9 @@ public class AvailableOrdersActivity extends AppCompatActivity {
     private int driverId;
     private List<FoodOrder> availableOrders;
 
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,9 +41,6 @@ public class AvailableOrdersActivity extends AppCompatActivity {
 
         ListView listView = findViewById(R.id.availableOrdersList);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-
         executor.execute(() -> {
             try {
                 String response = RestOperations.sendGet(GET_AVAILABLE_ORDERS);
@@ -52,53 +50,24 @@ public class AvailableOrdersActivity extends AppCompatActivity {
                         Type listType = new TypeToken<List<FoodOrder>>() {}.getType();
                         availableOrders = new Gson().fromJson(response, listType);
 
-                        DriverOrdersAdapter adapter =
-                                new DriverOrdersAdapter(this, availableOrders);
+                        DriverOrdersAdapter adapter = new DriverOrdersAdapter(
+                                AvailableOrdersActivity.this,
+                                availableOrders,
+                                DriverOrdersAdapter.Mode.AVAILABLE_ORDERS,
+                                driverId
+                        );
                         listView.setAdapter(adapter);
-
-                        // CLICK = take this order
-                        listView.setOnItemClickListener((parent, view, position, id) -> {
-                            FoodOrder selectedOrder = availableOrders.get(position);
-                            takeOrder(selectedOrder.getId());
-                        });
-
                     } catch (Exception e) {
                         e.printStackTrace();
+                        Toast.makeText(this, "Failed to load available orders", Toast.LENGTH_SHORT).show();
                     }
                 });
 
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        });
-    }
-
-    private void takeOrder(int orderId) {
-        Executor executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        executor.execute(() -> {
-            try {
-                // Build JSON: { "orderId": X, "driverId": Y }
-                JsonObject obj = new JsonObject();
-                obj.addProperty("orderId", orderId);
-                obj.addProperty("driverId", driverId);
-
-                String payload = new Gson().toJson(obj);
-
-                String response = RestOperations.sendPost(ASSIGN_ORDER_TO_DRIVER, payload);
-
-                handler.post(() -> {
-                    if (!"Error".equals(response) && !response.isEmpty()) {
-                        Toast.makeText(this, "Order taken", Toast.LENGTH_SHORT).show();
-                        finish(); // Go back to My Deliveries and refresh and stuff and like you know
-                    } else {
-                        Toast.makeText(this, "Failed to take order", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                handler.post(() ->
+                        Toast.makeText(this, "Network error while loading orders", Toast.LENGTH_SHORT).show()
+                );
             }
         });
     }
