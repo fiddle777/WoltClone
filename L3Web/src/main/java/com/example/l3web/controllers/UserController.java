@@ -9,9 +9,14 @@ import com.example.l3web.repos.RestaurantRepo;
 import com.example.l3web.repos.UserRepo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jakarta.persistence.Basic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.example.l3web.model.VehicleType;
 
 import java.util.Properties;
 
@@ -78,7 +83,7 @@ public class UserController {
     @PutMapping(value = "updateUserById/{id}")
     public @ResponseBody User updateUserById(@RequestBody String info, @PathVariable int id) {
 
-        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException()); //cia noriu savo custom error
+        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException());
 
         Gson gson = new Gson();
         Properties properties = gson.fromJson(info, Properties.class);
@@ -124,4 +129,59 @@ public class UserController {
         }
 
     }
+    @PostMapping("updateUserInfo")
+    public @ResponseBody User updateUserInfo(@RequestBody String body) {
+        // Parse incoming JSON
+        JsonObject json = new JsonParser().parse(body).getAsJsonObject();
+
+        int id = json.get("id").getAsInt();
+        User user = userRepo.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        if (json.has("name")) {
+            user.setName(json.get("name").getAsString());
+        }
+        if (json.has("surname")) {
+            user.setSurname(json.get("surname").getAsString());
+        }
+        if (json.has("phoneNumber")) {
+            user.setPhoneNumber(json.get("phoneNumber").getAsString());
+        }
+
+        // BasicUser fields
+        if (user instanceof BasicUser basicUser) {
+            if (json.has("address")) {
+                basicUser.setAddress(json.get("address").getAsString());
+            }
+        }
+
+        // Driver-specific fields
+        if (user instanceof Driver driver) {
+            if (json.has("licence")) {
+                driver.setLicence(json.get("licence").getAsString());
+            }
+            if (json.has("bDate") && !json.get("bDate").isJsonNull()) {
+                String dateStr = json.get("bDate").getAsString();
+                if (!dateStr.isEmpty()) {
+                    driver.setBDate(LocalDate.parse(dateStr));   // yyyy-MM-dd
+                }
+            }
+            if (json.has("vehicleType")) {
+                String vt = json.get("vehicleType").getAsString();
+                if (vt != null && !vt.isEmpty()) {
+                    driver.setVehicleType(VehicleType.valueOf(vt));
+                }
+            }
+        }
+
+        try {
+            user.setDateUpdated(LocalDateTime.now());
+        } catch (Exception ignored) {
+        }
+
+        return userRepo.save(user);
+    }
+
 }

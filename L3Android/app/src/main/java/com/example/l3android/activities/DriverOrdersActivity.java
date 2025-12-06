@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.l3android.R;
 import com.example.l3android.Utils.RestOperations;
+import com.example.l3android.model.Driver;
 import com.example.l3android.model.FoodOrder;
 import com.example.l3android.model.User;
 import com.google.gson.Gson;
@@ -24,10 +26,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+
 public class DriverOrdersActivity extends AppCompatActivity {
 
     private int driverId;
     private ListView listView;
+    private Driver currentDriver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,7 @@ public class DriverOrdersActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.driverOrdersList);
         Button takeMoreBtn = findViewById(R.id.takeMoreOrdersButton);
+        Button myAccountBtn = findViewById(R.id.driverMyAccountButton);
 
         takeMoreBtn.setOnClickListener(v -> {
             Intent i = new Intent(DriverOrdersActivity.this, AvailableOrdersActivity.class);
@@ -46,8 +51,21 @@ public class DriverOrdersActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        myAccountBtn.setOnClickListener(v -> {
+            String userInfo = getIntent().getStringExtra("userJsonObject");
+            Intent myInfoIntent = new Intent(DriverOrdersActivity.this, MyInfoActivity.class);
+            myInfoIntent.putExtra("userJson", userInfo);
+            startActivity(myInfoIntent);
+        });
+
+        String userJson = intent.getStringExtra("userJsonObject");
+        if (userJson != null) {
+            currentDriver = new Gson().fromJson(userJson, Driver.class);
+        }
+
         loadOrders();
     }
+
 
     @Override
     protected void onResume() {
@@ -82,5 +100,14 @@ public class DriverOrdersActivity extends AppCompatActivity {
             }
         });
     }
+    public void viewMyAccount(View view) {
+        Intent parentIntent = getIntent();
+        String userInfo = parentIntent.getStringExtra("userJsonObject");
+
+        Intent myInfoIntent = new Intent(DriverOrdersActivity.this, MyInfoActivity.class);
+        myInfoIntent.putExtra("userJson", userInfo);
+        startActivity(myInfoIntent);
+    }
+
 }
 

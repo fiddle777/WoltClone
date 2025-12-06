@@ -18,11 +18,14 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.l3android.R;
 import com.example.l3android.Utils.LocalDateTimeAdapter;
 import com.example.l3android.Utils.RestOperations;
+import com.example.l3android.model.BasicUser;
 import com.example.l3android.model.Driver;
 import com.example.l3android.model.Restaurant;
 import com.example.l3android.model.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -61,7 +64,6 @@ public class WoltRestaurants extends AppCompatActivity {
         if (currentUser instanceof Driver) {
 
         } else if (currentUser instanceof Restaurant) {
-            //net neleisim sito
         } else {
             Executor executor = Executors.newSingleThreadExecutor();
             Handler handler = new Handler(Looper.getMainLooper());
@@ -73,17 +75,12 @@ public class WoltRestaurants extends AppCompatActivity {
                     handler.post(() -> {
                         try {
                             if (!response.equals("Error")) {
-                                //Cia yra dalis, kaip is json, kuriame yra [{},{}, {},...] paversti i List is Restoranu
-
                                 GsonBuilder gsonBuilder = new GsonBuilder();
                                 gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
                                 Gson gsonRestaurants = gsonBuilder.setPrettyPrinting().create();
                                 Type restaurantListType = new TypeToken<List<Restaurant>>() {
                                 }.getType();
                                 List<Restaurant> restaurantListFromJson = gsonRestaurants.fromJson(response, restaurantListType);
-                                //Json parse end
-
-                                //Reikia tuos duomenis, kuriuos ka tik isparsinau is json, atvaizduoti grafiniam elemente
                                 ListView restaurantListElement = findViewById(R.id.restaurantList);
                                 RestaurantAdapter adapter = new RestaurantAdapter(this, restaurantListFromJson);
                                 restaurantListElement.setAdapter(adapter);
@@ -117,8 +114,12 @@ public class WoltRestaurants extends AppCompatActivity {
     }
 
     public void viewMyAccount(View view) {
-        Intent intent = new Intent(WoltRestaurants.this, MyInfoActivity.class);
-        intent.putExtra("userJson", new Gson().toJson(currentUser));
-        startActivity(intent);
+        Intent parentIntent = getIntent();
+        String userInfo = parentIntent.getStringExtra("userJsonObject");
+
+        Intent myInfoIntent = new Intent(WoltRestaurants.this, MyInfoActivity.class);
+        myInfoIntent.putExtra("userJson", userInfo);
+        startActivity(myInfoIntent);
     }
+
 }

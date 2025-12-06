@@ -15,5 +15,5 @@ public class Constants {
     public static final String MARK_ORDER_DELIVERED = HOME_URL + "markOrderDelivered/";
     public static final String ASSIGN_ORDER_TO_DRIVER = HOME_URL + "assignOrderToDriver";
     public static final String GET_AVAILABLE_ORDERS = HOME_URL + "getAvailableOrders";
-
+    public static final String UPDATE_USER_INFO = HOME_URL + "updateUserInfo";
 }
