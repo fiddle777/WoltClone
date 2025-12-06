@@ -110,6 +110,8 @@ public class User implements Serializable {
         isAdmin = admin;
     }
 
+
+
     @Override
     public String toString() {
         return "Name: " + name + "Surname " + surname;

@@ -24,6 +24,9 @@ public class FoodOrder {
     private String name;
     private Double price;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
     private String restaurantName = name;
 
     @Column(length = 1000)
@@ -48,6 +51,10 @@ public class FoodOrder {
     @ManyToOne
     private Restaurant restaurant;
 
+    @JsonIgnore
+    @ManyToOne
+    private Driver driver;
+
     @PrePersist
     protected void onCreate() {
         dateCreated = LocalDateTime.now();
@@ -58,4 +65,5 @@ public class FoodOrder {
     protected void onUpdate() {
         dateUpdated = LocalDateTime.now();
     }
+
 }

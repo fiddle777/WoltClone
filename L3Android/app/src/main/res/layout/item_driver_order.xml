@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/driverOrderTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Order #0"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/driverOrderRestaurant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Restaurant"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
+        android:id="@+id/driverOrderStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: IN_DELIVERY"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
+        android:id="@+id/driverOrderPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="€0.00"
+        android:layout_marginTop="2dp"/>
+
+    <Button
+        android:id="@+id/driverOrderCompleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mark delivered"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

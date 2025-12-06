@@ -35,6 +35,12 @@
         <activity
             android:name=".activities.MyInfoActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.DriverOrdersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AvailableOrdersActivity"
+            android:exported="false" />
 
         <activity
             android:name=".activities.MainActivity"

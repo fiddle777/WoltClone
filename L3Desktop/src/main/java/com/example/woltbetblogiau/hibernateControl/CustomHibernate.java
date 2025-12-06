@@ -94,17 +94,17 @@ public class CustomHibernate extends GenericHibernate {
                 predicates.add(cb.equal(root.get("restaurant"), restaurant));
             }
             if(orderStatus != null){
-                predicates.add(cb.equal(root.get("orderStatus"), orderStatus));
+                predicates.add(cb.equal(root.get("status"), orderStatus));
             }
             if(client != null){
                 predicates.add(cb.equal(root.get("buyer"), client));
             }
-            if(start != null && end != null){
-                predicates.add(cb.between(root.get("orderDate"), start, end));
-            } else if(start != null){
-                predicates.add(cb.greaterThanOrEqualTo(root.get("orderDate"), start));
-            } else if(end != null){
-                predicates.add(cb.lessThanOrEqualTo(root.get("orderDate"), end));
+            if (start != null && end != null) {
+                predicates.add(cb.between(root.get("dateCreated"), start, end));
+            } else if (start != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateCreated"), start));
+            } else if (end != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateCreated"), end));
             }
             query.select(root);
             if(!predicates.isEmpty()){

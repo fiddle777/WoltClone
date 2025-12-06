@@ -3,6 +3,7 @@ package com.example.l3web.controllers;
 import com.example.l3web.model.BasicUser;
 import com.example.l3web.model.Restaurant;
 import com.example.l3web.model.User;
+import com.example.l3web.model.Driver;
 import com.example.l3web.repos.BasicUserRepo;
 import com.example.l3web.repos.RestaurantRepo;
 import com.example.l3web.repos.UserRepo;
@@ -93,11 +94,12 @@ public class UserController {
         userRepo.save(user);
         return userRepo.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
     }
-//    @PostMapping(value = "insertDriver")
-//    public @ResponseBody User createDriver(@RequestBody Driver user) {
-//        dri.save(user);
-//        return userRepo.getUserByLoginAndPassword(user.getLogin(), user.getPassword());
-//    }
+
+    @PostMapping(value = "insertDriver")
+    public @ResponseBody User createDriver(@RequestBody Driver driver) {
+        basicUserRepo.save(driver);
+        return userRepo.getUserByLoginAndPassword(driver.getLogin(), driver.getPassword());
+    }
 
     @PostMapping(value = "insertBasic")
     public @ResponseBody User createUser(@RequestBody BasicUser user) {

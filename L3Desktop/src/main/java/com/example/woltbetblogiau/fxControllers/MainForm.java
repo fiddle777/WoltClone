@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 public class MainForm implements Initializable {
+    @FXML public DatePicker DateFilterFrom;
+    @FXML public DatePicker DateFilterTo;
     @FXML
     public Tab userTab;
     @FXML
@@ -233,6 +235,10 @@ public class MainForm implements Initializable {
                 }
                 setText(it.getName() + " • " + it.getPrice());
             }
+        });
+
+        cuisineList.getSelectionModel().selectedItemProperty().addListener((obs, oldCuisine, newCuisine) -> {
+            loadCuisineInfo();
         });
 
         restaurantList.getSelectionModel().selectedItemProperty().addListener((obs, o, r) -> loadRestaurantMenu());
@@ -471,7 +477,7 @@ public class MainForm implements Initializable {
         foodOrder.setBuyer(clientList.getSelectionModel().getSelectedItem());
         foodOrder.setRestaurant(restaurantField.getSelectionModel().getSelectedItem());
         if (orderStatusField.getValue() != null) {
-            foodOrder.setOrderStatus(orderStatusField.getValue());
+            foodOrder.setStatus(orderStatusField.getValue());
         }
         List<Cuisine> selectedFood = new ArrayList<>(foodList.getSelectionModel().getSelectedItems());
         foodOrder.setCuisineList(selectedFood);
@@ -531,32 +537,49 @@ public class MainForm implements Initializable {
             }
         }
 
-        if (selectedOrder.getOrderStatus() != null) {
-            orderStatusField.getSelectionModel().select(selectedOrder.getOrderStatus());
+        if (selectedOrder.getStatus() != null) {
+            orderStatusField.getSelectionModel().select(selectedOrder.getStatus());
         }
 
         disableFoodOrderFields();
     }
 
     private void disableFoodOrderFields() {
-        if (orderStatusField.getSelectionModel().getSelectedItem() == OrderStatus.COMPLETED) {
+        if (orderStatusField.getSelectionModel().getSelectedItem() == OrderStatus.DELIVERED) {
             clientList.setDisable(true);
             priceField.setDisable(true);
         }
     }
 
     public void filterOrders() {
-        OrderStatus status = filterStatus.getSelectionModel().getSelectedItem();
-        BasicUser client = filterClients.getSelectionModel().getSelectedItem();
-        LocalDate start = filterFrom.getValue();
-        LocalDate end = filterTo.getValue();
+        OrderStatus status = (filterStatus != null)
+                ? filterStatus.getSelectionModel().getSelectedItem()
+                : null;
+
+        BasicUser client = (filterClients != null)
+                ? filterClients.getSelectionModel().getSelectedItem()
+                : null;
+
+        LocalDate start = null;
+        LocalDate end = null;
+
+        if (filterFrom != null) {
+            start = filterFrom.getValue();
+        }
+        if (filterTo != null) {
+            end = filterTo.getValue();
+        }
+
         Restaurant restaurant = null;
         if (currentUser instanceof Restaurant) {
             restaurant = (Restaurant) currentUser;
         }
-        List<FoodOrder> filteredOrders = customHibernate.getFilteredRestaurantOrders(status, client, start, end, restaurant);
+
+        List<FoodOrder> filteredOrders =
+                customHibernate.getFilteredRestaurantOrders(status, client, start, end, restaurant);
         ordersList.getItems().setAll(filteredOrders);
     }
+
 
     public void loadRestaurantMenuForOrder() {
         Restaurant restaurant = restaurantField.getSelectionModel().getSelectedItem();
@@ -750,4 +773,25 @@ public class MainForm implements Initializable {
         customHibernate.delete(Cuisine.class, cuisine.getId());
         loadRestaurantMenu();
     }
+
+    public void loadCuisineInfo() {
+        Cuisine selected = cuisineList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            titleCuisineField.clear();
+            ingredientsField.clear();
+            cuisinePriceField.clear();
+            isDeadly.setSelected(false);
+            isVegan.setSelected(false);
+            return;
+        }
+
+        titleCuisineField.setText(selected.getName());
+        ingredientsField.setText(selected.getIngredients());
+        cuisinePriceField.setText(
+                selected.getPrice() != null ? selected.getPrice().toString() : ""
+        );
+        isDeadly.setSelected(selected.isSpicy());
+        isVegan.setSelected(selected.isVegan());
+    }
+
 }

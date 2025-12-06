@@ -36,6 +36,9 @@ public class User implements Serializable {
         this.surname = surname;
         this.phoneNumber = phoneNumber;
     }
+    public String getUserType() {
+        return this.getClass().getSimpleName();
+    }
 
     @Override
     public String toString() {

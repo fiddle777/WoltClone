@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,6 +21,7 @@ import com.example.l3android.R;
 import com.example.l3android.Utils.RestOperations;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -55,21 +57,43 @@ public class MainActivity extends AppCompatActivity {
         executor.execute(() -> {
             try {
                 String response = RestOperations.sendPost(VALIDATE_USER_URL, info);
+
                 handler.post(() -> {
-                    if (!response.equals("Error") && !response.isEmpty()) {
-                        Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
-                        intent.putExtra("userJsonObject", response);
-                        //??Jei noriu kazka is response paimt, man reikia parsint sia dali
-                        //intent.putExtra("userId", )
-                        startActivity(intent);
+                    if (!"Error".equals(response) && !response.isEmpty()) {
+                        JsonObject userJson = new JsonParser().parse(response).getAsJsonObject();
+
+                        String userType = userJson.get("userType").getAsString();
+
+                        boolean isDriver = userType.equals("com.example.l3web.model.Driver");
+                        boolean isBasicUser = userType.equals("com.example.l3web.model.BasicUser");
+                        boolean isRestaurant = userType.equals("com.example.l3web.model.Restaurant");
+                        Log.d("ACHTUNGASOHAOSIHGAUserTypeCheck", "isDriver=" + isDriver
+                                + ", isBasicUser=" + isBasicUser
+                                + ", isRestaurant=" + isRestaurant);
+
+
+                        if (isDriver) {
+                            Log.d("POPLIASOIFUAOISUFONavigation", "Navigating to DriverOrdersActivity");
+                            // DRIVER FLOW
+                            Intent intent = new Intent(MainActivity.this, DriverOrdersActivity.class);
+                            intent.putExtra("userJsonObject", response);
+                            intent.putExtra("driverId", userJson.get("id").getAsInt());
+                            startActivity(intent);
+                            return;
+                        } else {
+                            // NORMAL USER FLOW
+                            Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
+                            intent.putExtra("userJsonObject", response);
+                            startActivity(intent);
+                        }
                     }
                 });
+
             } catch (IOException e) {
-                //Toast reikes
+                // mmm toast
+                e.printStackTrace();
             }
-
         });
-
     }
 
     public void loadRegWindow(View view) {

@@ -1,9 +1,6 @@
 package com.example.l3web.controllers;
 
-import com.example.l3web.model.Chat;
-import com.example.l3web.model.Cuisine;
-import com.example.l3web.model.FoodOrder;
-import com.example.l3web.model.Review;
+import com.example.l3web.model.*;
 import com.example.l3web.repos.*;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +114,8 @@ public class OrdersController {
         order.setBuyer(buyer);
         order.setRestaurant(restaurant);
         order.setCuisineList(cuisines);
+        order.setStatus(OrderStatus.NEW);
+        order.setDriver(null);
 
         order.setRestaurantName(restaurant.getName());
         order.setItemsSummary(summaryBuilder.toString());
@@ -131,4 +130,44 @@ public class OrdersController {
         return order;
     }
 
+    @GetMapping("getOrdersForDriver/{driverId}")
+    public @ResponseBody List<FoodOrder> getOrdersForDriver(@PathVariable int driverId) {
+        return ordersRepo.getFoodOrdersByDriver_Id(driverId);
+    }
+    @PostMapping("assignOrderToDriver")
+    public @ResponseBody FoodOrder assignOrderToDriver(@RequestBody AssignOrderRequest request) {
+        FoodOrder order = ordersRepo.findById(request.orderId).orElse(null);
+        if (order == null) {
+            return null; // or throw 404
+        }
+
+        Driver driver = (Driver) basicUserRepo.findById(request.driverId).orElse(null);
+        if (driver == null) {
+            return null; // or throw 404
+        }
+
+        order.setDriver(driver);
+        order.setStatus(OrderStatus.IN_DELIVERY);
+        return ordersRepo.save(order);
+    }
+    public static class AssignOrderRequest {
+        public int orderId;
+        public int driverId;
+    }
+    @PostMapping("markOrderDelivered/{orderId}")
+    public @ResponseBody FoodOrder markOrderDelivered(@PathVariable int orderId) {
+        FoodOrder order = ordersRepo.findById(orderId).orElse(null);
+        if (order == null) {
+            return null; // or 404
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        return ordersRepo.save(order);
+    }
+
+
+    @GetMapping("getAvailableOrders")
+    public @ResponseBody List<FoodOrder> getAvailableOrders() {
+        return ordersRepo.getFoodOrdersByDriverIsNullAndStatus(OrderStatus.NEW);
+    }
 }

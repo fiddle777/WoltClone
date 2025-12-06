@@ -22,14 +22,14 @@ public class FoodOrder {
     private Double price;
     @ManyToOne
     private BasicUser buyer;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Cuisine> cuisineList;
     @OneToOne
     private Chat chat;
     @ManyToOne
     private Restaurant restaurant;
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    private OrderStatus status;
     private LocalDate dateCreated;
     private LocalDate dateUpdated;
 
@@ -46,7 +46,7 @@ public class FoodOrder {
         this.buyer = buyer;
         this.cuisineList = cuisineList;
         this.restaurant = restaurant;
-        this.orderStatus = OrderStatus.PENDING;
+        this.status = OrderStatus.NEW;
     }
 
     @Override

@@ -1,14 +1,13 @@
 package com.example.l3android.model;
 
 public class FoodOrder {
-
     private int id;
     private String name;
     private Double price;
-
     private String restaurantName = name;
     private String itemsSummary;
     private String dateCreated;
+    private String status;
 
     public FoodOrder(int id, String name, Double price) {
         this.id = id;
@@ -54,4 +53,6 @@ public class FoodOrder {
     public void setDateCreated(String dateCreated) {
         this.dateCreated = dateCreated;
     }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
