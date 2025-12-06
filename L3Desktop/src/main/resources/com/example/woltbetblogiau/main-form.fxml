@@ -121,7 +121,10 @@
                                         </ContextMenu>
                                     </contextMenu>
                                 </ListView>
-                                <Button layoutX="587.0" layoutY="395.0" mnemonicParsing="false" text="Update data" />
+                        <TextArea fx:id="chatMessageBody" layoutX="443.0" layoutY="33.0" prefHeight="200.0" prefWidth="185.0" promptText="type a reply..." />
+                        <Button fx:id="sendChatMessage" layoutX="443.0" layoutY="253.0" mnemonicParsing="false" onAction="#sendChatMessage" prefHeight="25.0" prefWidth="101.0" text="Send message" />
+                        <Button fx:id="deleteChat" layoutX="443.0" layoutY="328.0" mnemonicParsing="false" onAction="#deleteChat" prefHeight="25.0" prefWidth="101.0" text="Delete chat" />
+                        <Button fx:id="deleteMessage" layoutX="443.0" layoutY="290.0" mnemonicParsing="false" onAction="#deleteMessage" text="Delete Message" />
                             </children>
                         </AnchorPane>
                     </content>

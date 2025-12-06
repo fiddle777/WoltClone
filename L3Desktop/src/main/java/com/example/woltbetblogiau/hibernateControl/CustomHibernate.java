@@ -135,4 +135,27 @@ public class CustomHibernate extends GenericHibernate {
         }
         return list;
     }
+    public List<Review> getChatMessages(Chat chat) {
+        entityManager = null;
+        List<Review> messages = new ArrayList<>();
+        try {
+            entityManager = entityManagerFactory.createEntityManager();
+            var query = entityManager.createQuery(
+                    "SELECT r FROM Review r WHERE r.chat = :chat ORDER BY r.dateCreated",
+                    Review.class
+            );
+            query.setParameter("chat", chat);
+            messages = query.getResultList();
+        } catch (Exception e) {
+            if (entityManager != null && entityManager.isOpen()) {
+                entityManager.close();
+            }
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+        return messages;
+    }
+
 }

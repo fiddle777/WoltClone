@@ -20,6 +20,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import javafx.scene.control.Alert;
+
 
 import java.io.IOException;
 import java.net.URL;
@@ -87,6 +89,7 @@ public class MainForm implements Initializable {
     public Tab chatTab;
     public ListView<Chat> allChats;
     public ListView<Review> chatMessages;
+    public TextArea chatMessageBody;
     //</editor-fold>
     private EntityManagerFactory entityManagerFactory;
     private CustomHibernate customHibernate;
@@ -742,19 +745,53 @@ public class MainForm implements Initializable {
     //</editor-fold>
 
     //<editor-fold desc="Admin Chat Functionality">
-    public void loadChatMessages() {
-//        chatMessages.getItems().addAll(customHibernate.getChatMessages(allChats.getSelectionModel().getSelectedItem()));
+    @FXML
+    public void loadChatMessages(MouseEvent event) {
+        Chat selectedChat = allChats.getSelectionModel().getSelectedItem();
+        if (selectedChat == null) {
+            chatMessages.getItems().clear();
+            return;
+        }
+
+        List<Review> messages = customHibernate.getChatMessages(selectedChat);
+        chatMessages.getItems().setAll(messages);
     }
 
-    public void deleteChat() {
+    @FXML
+    public void deleteChat(ActionEvent event) {
+        Chat selectedChat = allChats.getSelectionModel().getSelectedItem();
+
+        if (selectedChat == null) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Select a chat to delete.")
+                    .showAndWait();
+            return;
+        }
+
+        customHibernate.delete(Chat.class, selectedChat.getId());
+        allChats.getItems().setAll(customHibernate.getAllRecords(Chat.class));
+        chatMessages.getItems().clear();
     }
 
-    public void deleteMessage() {
+
+
+    @FXML
+    public void deleteMessage(ActionEvent event) {
+        Review selectedMessage = chatMessages.getSelectionModel().getSelectedItem();
+        Chat selectedChat = allChats.getSelectionModel().getSelectedItem();
+
+        if (selectedMessage == null || selectedChat == null) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Select a message to delete.")
+                    .showAndWait();
+            return;
+        }
+
+        customHibernate.delete(Review.class, selectedMessage.getId());
+        chatMessages.getItems().setAll(customHibernate.getChatMessages(selectedChat));
     }
 
-    public void loadChatForm(ActionEvent actionEvent) {
 
-    }
     //</editor-fold>
     private void helperPopulateManagementTab() {
         clearAllOrderFields();
@@ -828,5 +865,67 @@ public class MainForm implements Initializable {
         isDeadly.setSelected(selected.isSpicy());
         isVegan.setSelected(selected.isVegan());
     }
+
+    public void loadChatForm(ActionEvent actionEvent) {
+        FoodOrder selectedOrder = ordersList.getSelectionModel().getSelectedItem();
+        if (selectedOrder == null) {
+            new Alert(Alert.AlertType.WARNING, "Select an order to open chat for.").showAndWait();
+            return;
+        }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    HelloApplication.class.getResource("chat-form.fxml"));
+            Parent parent = fxmlLoader.load();
+
+            ChatForm controller = fxmlLoader.getController();
+            controller.setData(entityManagerFactory, currentUser, selectedOrder);
+
+            Stage stage = new Stage();
+            stage.setTitle("Chat for order #" + selectedOrder.getId());
+            stage.setScene(new Scene(parent));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    "Failed to open chat window:\n" + e.getMessage())
+                    .showAndWait();
+            e.printStackTrace();
+        }
+
+    }
+
+    @FXML
+    public void sendChatMessage(ActionEvent event) {
+        Chat selectedChat = allChats.getSelectionModel().getSelectedItem();
+        if (selectedChat == null) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Select a chat to send a message.")
+                    .showAndWait();
+            return;
+        }
+
+        String text = chatMessageBody.getText();
+        if (text == null || text.isBlank()) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Message is empty.")
+                    .showAndWait();
+            return;
+        }
+
+        BasicUser sender = null;
+        if (currentUser instanceof BasicUser) {
+            sender = (BasicUser) currentUser;
+        }
+
+        Review message = new Review(text, sender, selectedChat);
+        customHibernate.create(message);
+
+        chatMessageBody.clear();
+        chatMessages.getItems().setAll(customHibernate.getChatMessages(selectedChat));
+    }
+
+
 
 }

@@ -23,7 +23,7 @@ public class Chat {
     private String name;
     private String chatText;
     private LocalDate dateCreated;
-    @OneToOne(mappedBy = "chat", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "chat")
     private FoodOrder foodOrder;
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> messages;
@@ -33,5 +33,10 @@ public class Chat {
         this.foodOrder = foodOrder;
         this.dateCreated = LocalDate.now();
         this.messages = new ArrayList<>();
+    }
+    @Override
+    public String toString() {
+        String orderPart = (foodOrder != null) ? ("Order #" + foodOrder.getId()) : "No order";
+        return orderPart + " – " + (name != null ? name : "Chat");
     }
 }

@@ -32,4 +32,11 @@ public class Review {
         this.commentOwner = commentOwner;
         this.chat = chat;
     }
+    @Override
+    public String toString() {
+        String textPart = (reviewText != null) ? reviewText : "";
+        String datePart = (dateCreated != null) ? (" (" + dateCreated.toString() + ")") : "";
+        return textPart + datePart;
+    }
+
 }
