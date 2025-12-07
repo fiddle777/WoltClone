@@ -261,14 +261,41 @@ public class MainForm implements Initializable {
         reloadTableData();
     }
     private void setUserFormVisibility() {
-        if (currentUser instanceof User) {
-            //turbut nieko nedarom, gal kazka custom
-
-        } else if (currentUser instanceof Restaurant) {
-//            altTab.setDisable(true);
+        if (currentUser == null) {
+            return;
         }
 
+        boolean isRestaurant = currentUser instanceof Restaurant;
+        boolean isAdmin = currentUser.isAdmin();
+
+        if (isAdmin) {
+            // admin fill access
+            if (userTab != null) userTab.setDisable(false);
+            if (managementTab != null) managementTab.setDisable(false);
+            if (foodTab != null) foodTab.setDisable(false);
+            if (chatTab != null) chatTab.setDisable(false);
+            return;
+        }
+
+        if (isRestaurant) {
+            // Restaurant
+            if (userTab != null) userTab.setDisable(true);
+            if (managementTab != null) managementTab.setDisable(false);
+            if (foodTab != null) foodTab.setDisable(false);
+            if (chatTab != null) chatTab.setDisable(false);
+            return;
+        }
+
+        // Safety net
+        new Alert(Alert.AlertType.ERROR,
+                "Only administrators and restaurant accounts can use the desktop application.")
+                .showAndWait();
+        if (tabsPane != null && tabsPane.getScene() != null) {
+            Stage stage = (Stage) tabsPane.getScene().getWindow();
+            stage.close();
+        }
     }
+
     //<editor-fold desc="User Tab functionality">
     public void reloadTableData() {
         if(customHibernate == null) {
@@ -301,10 +328,21 @@ public class MainForm implements Initializable {
                 helperPopulateManagementTab();
             } else if (foodTab.isSelected()) {
                 clearAllCuisineFields();
-                restaurantList.getItems().setAll(customHibernate.getAllRecords(Restaurant.class));
+                if (currentUser instanceof Restaurant restaurant) {
+                    // Only this restaurant in the list, and lock it.
+                    restaurantList.getItems().setAll(FXCollections.observableArrayList(restaurant));
+                    restaurantList.getSelectionModel().select(restaurant);
+                    restaurantList.setDisable(true);
+                } else {
+                    restaurantList.setDisable(false);
+                    restaurantList.getItems().setAll(customHibernate.getAllRecords(Restaurant.class));
+                }
             } else if (chatTab.isSelected()) {
-                allChats.getItems().setAll(customHibernate.getAllRecords(Chat.class));
-
+                if (currentUser instanceof Restaurant restaurant) {
+                    allChats.getItems().setAll(customHibernate.getRestaurantChats(restaurant));
+                } else {
+                    allChats.getItems().setAll(customHibernate.getAllRecords(Chat.class));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -802,8 +840,18 @@ public class MainForm implements Initializable {
         List<BasicUser> allClients = customHibernate.getAllBasicUsers();
         clientList.getItems().setAll(allClients);
 
+        // Restaurant combobox in order editor
         restaurantField.getItems()
                 .setAll(customHibernate.getAllRecords(Restaurant.class));
+
+        // lock restaurantField if rest login
+        if (currentUser instanceof Restaurant restaurant) {
+            restaurantField.getItems().setAll(FXCollections.observableArrayList(restaurant));
+            restaurantField.getSelectionModel().select(restaurant);
+            restaurantField.setDisable(true);
+        } else {
+            restaurantField.setDisable(false);
+        }
 
         orderStatusField.getItems().setAll(OrderStatus.values());
         filterStatus.getItems().setAll(OrderStatus.values());
@@ -827,9 +875,18 @@ public class MainForm implements Initializable {
                             java.util.stream.Collectors.toMap(Restaurant::getId, r -> r, (a, b) -> a),
                             m -> new java.util.ArrayList<>(m.values())
                     ));
-            filterRestaurants.getItems().setAll(distinctRestaurants);
+
+            if (currentUser instanceof Restaurant restaurant) {
+                filterRestaurants.getItems().setAll(FXCollections.observableArrayList(restaurant));
+                filterRestaurants.getSelectionModel().select(restaurant);
+                filterRestaurants.setDisable(true);
+            } else {
+                filterRestaurants.getItems().setAll(distinctRestaurants);
+                filterRestaurants.setDisable(false);
+            }
         }
     }
+
 
 
     public void deleteCuisine(ActionEvent actionEvent) {

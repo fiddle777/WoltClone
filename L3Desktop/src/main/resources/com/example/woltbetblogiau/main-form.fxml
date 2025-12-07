@@ -15,6 +15,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="470.0" prefWidth="823.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.woltbetblogiau.fxControllers.MainForm">
     <children>
@@ -24,7 +25,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <TableView fx:id="userTable" layoutX="1.0" layoutY="6.0" prefHeight="180.0" prefWidth="594.0">
+                                <TableView fx:id="userTable" layoutX="1.0" layoutY="6.0" prefHeight="430.0" prefWidth="594.0">
                                     <columns>
                                         <TableColumn fx:id="idCol" prefWidth="56.79998779296875" text="Id" />
                                         <TableColumn fx:id="userTypeCol" prefWidth="69.60003662109375" text="User type" />
@@ -36,9 +37,14 @@
                                         <TableColumn fx:id="dummyCol" prefWidth="96.00006103515625" text="Action" />
                                     </columns>
                                 </TableView>
-                                <Button layoutX="228.0" layoutY="245.0" mnemonicParsing="false" onAction="#loadUser" text="Update User" />
-                                <Button layoutX="106.0" layoutY="245.0" mnemonicParsing="false" onAction="#addUser" text="Add new user" />
-                                <Button layoutX="334.0" layoutY="245.0" mnemonicParsing="false" onAction="#deleteUser" text="Delete User" />
+                                <Button layoutX="626.0" layoutY="303.0" mnemonicParsing="false" onAction="#loadUser" text="Update User" />
+                                <Button layoutX="621.0" layoutY="258.0" mnemonicParsing="false" onAction="#addUser" text="Add new user" />
+                                <Button layoutX="628.0" layoutY="349.0" mnemonicParsing="false" onAction="#deleteUser" text="Delete User" />
+                        <ComboBox fx:id="userSearchTypeCombo" layoutX="621.0" layoutY="35.0" prefWidth="150.0" promptText="SearchType" />
+                        <TextField fx:id="userSearchField" layoutX="621.0" layoutY="73.0" promptText="enter text pls" />
+                        <Text layoutX="621.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Search" />
+                        <Button fx:id="searchUsersButton" layoutX="621.0" layoutY="116.0" mnemonicParsing="false" onAction="#searchUsers" text="Search" />
+                        <Button fx:id="clearUserSearchButton" layoutX="728.0" layoutY="116.0" mnemonicParsing="false" onAction="#clearUserSearch" text="Clear" />
                             </children>
                         </AnchorPane>
                     </content>

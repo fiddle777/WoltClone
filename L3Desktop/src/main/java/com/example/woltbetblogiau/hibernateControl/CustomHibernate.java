@@ -6,6 +6,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import javafx.scene.control.Alert;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -157,5 +158,30 @@ public class CustomHibernate extends GenericHibernate {
         }
         return messages;
     }
+    public List<Chat> getRestaurantChats(Restaurant restaurant) {
+        entityManager = null;
+        List<Chat> chats = new ArrayList<>();
+        try {
+            entityManager = entityManagerFactory.createEntityManager();
+            var query = entityManager.createQuery(
+                    "SELECT c FROM Chat c WHERE c.foodOrder.restaurant = :restaurant",
+                    Chat.class
+            );
+            query.setParameter("restaurant", restaurant);
+            chats = query.getResultList();
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("An error occurred while fetching chats");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+        return chats;
+    }
+
 
 }

@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,42 +60,75 @@ public class MainActivity extends AppCompatActivity {
                 String response = RestOperations.sendPost(VALIDATE_USER_URL, info);
 
                 handler.post(() -> {
-                    if (!"Error".equals(response) && !response.isEmpty()) {
-                        JsonObject userJson = new JsonParser().parse(response).getAsJsonObject();
+                    // Network / server error
+                    if (response == null || response.isEmpty() || "Error".equals(response)) {
+                        Toast.makeText(MainActivity.this,
+                                "Server error. Try again.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                        String userType = userJson.get("userType").getAsString();
+                    JsonObject userJson = new JsonParser().parse(response).getAsJsonObject();
 
-                        boolean isDriver = userType.equals("com.example.l3web.model.Driver");
-                        boolean isBasicUser = userType.equals("com.example.l3web.model.BasicUser");
-                        boolean isRestaurant = userType.equals("com.example.l3web.model.Restaurant");
-                        Log.d("ACHTUNGASOHAOSIHGAUserTypeCheck", "isDriver=" + isDriver
-                                + ", isBasicUser=" + isBasicUser
-                                + ", isRestaurant=" + isRestaurant);
+                    // Read status from backend
+                    String status = userJson.has("status") && !userJson.get("status").isJsonNull()
+                            ? userJson.get("status").getAsString()
+                            : "OK";
 
+                    if ("NO_USER".equals(status)) {
+                        Toast.makeText(MainActivity.this,
+                                "User with this login does not exist.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                        if (isDriver) {
-                            Log.d("POPLIASOIFUAOISUFONavigation", "Navigating to DriverOrdersActivity");
-                            // DRIVER FLOW
-                            Intent intent = new Intent(MainActivity.this, DriverOrdersActivity.class);
-                            intent.putExtra("userJsonObject", response);
-                            intent.putExtra("driverId", userJson.get("id").getAsInt());
-                            startActivity(intent);
-                            return;
-                        } else {
-                            // NORMAL USER FLOW
-                            Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
-                            intent.putExtra("userJsonObject", response);
-                            startActivity(intent);
-                        }
+                    if ("WRONG_PASSWORD".equals(status)) {
+                        Toast.makeText(MainActivity.this,
+                                "Incorrect password.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String userType = userJson.get("userType").getAsString();
+
+                    boolean isDriver = userType.equals("com.example.l3web.model.Driver");
+                    boolean isBasicUser = userType.equals("com.example.l3web.model.BasicUser");
+                    boolean isRestaurant = userType.equals("com.example.l3web.model.Restaurant");
+                    Log.d("ACHTUNGASOHAOSIHGAUserTypeCheck", "isDriver=" + isDriver
+                            + ", isBasicUser=" + isBasicUser
+                            + ", isRestaurant=" + isRestaurant);
+
+                    // Block restaurants
+                    if (isRestaurant) {
+                        Toast.makeText(MainActivity.this,
+                                "Restaurant accounts can only use the desktop application.",
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    // Driver vs normal user nav
+                    if (isDriver) {
+                        Log.d("POPLIASOIFUAOISUFONavigation", "Navigating to DriverOrdersActivity");
+                        Intent intent = new Intent(MainActivity.this, DriverOrdersActivity.class);
+                        intent.putExtra("userJsonObject", response);
+                        intent.putExtra("driverId", userJson.get("id").getAsInt());
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
+                        intent.putExtra("userJsonObject", response);
+                        startActivity(intent);
                     }
                 });
 
             } catch (IOException e) {
-                // mmm toast
                 e.printStackTrace();
+                handler.post(() -> Toast.makeText(MainActivity.this,
+                        "Network error. Try again.",
+                        Toast.LENGTH_SHORT).show());
             }
         });
     }
+
 
     public void loadRegWindow(View view) {
         Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);

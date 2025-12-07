@@ -52,27 +52,38 @@ public class UserController {
     @PostMapping(value = "validateUser") //http://localhost:8080/validateUser
     public @ResponseBody String getUserByCredentials(@RequestBody String info) {
         System.out.println(info);
-        //?Kaip parsint
         Gson gson = new Gson();
         Properties properties = gson.fromJson(info, Properties.class);
-        var login = properties.getProperty("login");
-        var psw = properties.getProperty("password");
-        User user = userRepo.getUserByLoginAndPassword(login, psw);
-        if (user != null) {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("userType", user.getClass().getName());
-            jsonObject.addProperty("login", user.getLogin());
-            jsonObject.addProperty("password", user.getPassword());
-            jsonObject.addProperty("name", user.getName());
-            jsonObject.addProperty("surname", user.getSurname());
-            jsonObject.addProperty("id", user.getId());
+        String login = properties.getProperty("login");
+        String psw = properties.getProperty("password");
 
-            String json = gson.toJson(jsonObject);
+        JsonObject jsonObject = new JsonObject();
 
-            return json;
+        // 1) Check if user with this login exists
+        User userByLogin = userRepo.getUserByLogin(login);
+        if (userByLogin == null) {
+            jsonObject.addProperty("status", "NO_USER");
+            return gson.toJson(jsonObject);
         }
-        return null;
+
+        // 2) Check password
+        if (!userByLogin.getPassword().equals(psw)) {
+            jsonObject.addProperty("status", "WRONG_PASSWORD");
+            return gson.toJson(jsonObject);
+        }
+
+        // 3) GREAT SUCCESS yekshemahs
+        jsonObject.addProperty("status", "OK");
+        jsonObject.addProperty("userType", userByLogin.getClass().getName());
+        jsonObject.addProperty("login", userByLogin.getLogin());
+        jsonObject.addProperty("password", userByLogin.getPassword());
+        jsonObject.addProperty("name", userByLogin.getName());
+        jsonObject.addProperty("surname", userByLogin.getSurname());
+        jsonObject.addProperty("id", userByLogin.getId());
+
+        return gson.toJson(jsonObject);
     }
+
 
     @PutMapping(value = "updateUser")
     public @ResponseBody User updateUser(@RequestBody User user) {
