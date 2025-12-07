@@ -53,7 +53,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <ListView fx:id="ordersList" layoutX="14.0" layoutY="65.0" onMouseClicked="#loadOrderInfo" prefHeight="288.0" prefWidth="201.0">
+                                <ListView fx:id="ordersList" layoutX="15.0" layoutY="62.0" onMouseClicked="#loadOrderInfo" prefHeight="220.0" prefWidth="388.0">
                                     <contextMenu>
                                         <ContextMenu>
                                             <items>
@@ -61,22 +61,25 @@
                                             </items>
                                         </ContextMenu>
                                     </contextMenu></ListView>
-                                <Button layoutX="248.0" layoutY="320.0" mnemonicParsing="false" onAction="#createOrder" text="New" />
-                                <Button layoutX="371.0" layoutY="320.0" mnemonicParsing="false" onAction="#updateOrder" text="Update" />
-                                <Button layoutX="504.0" layoutY="320.0" mnemonicParsing="false" onAction="#deleteOrder" text="Delete" />
+                                <Button layoutX="746.0" layoutY="297.0" mnemonicParsing="false" onAction="#createOrder" text="New" />
+                                <Button layoutX="746.0" layoutY="341.0" mnemonicParsing="false" onAction="#updateOrder" text="Update" />
+                                <Button layoutX="748.0" layoutY="383.0" mnemonicParsing="false" onAction="#deleteOrder" text="Delete" />
                                 <TextField fx:id="titleField" layoutX="649.0" layoutY="106.0" promptText="Order Name" />
                                 <ComboBox fx:id="clientList" layoutX="648.0" layoutY="67.0" prefWidth="150.0" promptText="Select Client" />
                                 <TextField fx:id="priceField" layoutX="649.0" layoutY="143.0" promptText="Order Price" />
                                 <ComboBox fx:id="restaurantField" layoutX="649.0" layoutY="186.0" onAction="#loadRestaurantMenuForOrder" prefWidth="150.0" promptText="Restaurant" />
-                                <ListView fx:id="basicUserList" layoutX="220.0" layoutY="65.0" prefHeight="203.0" prefWidth="192.0" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="411.0" />
+                                <ListView fx:id="basicUserList" layoutX="14.0" layoutY="301.0" prefHeight="134.0" prefWidth="390.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="419.0" />
                                 <ComboBox fx:id="orderStatusField" layoutX="605.0" layoutY="438.0" prefWidth="150.0" promptText="Order Status" />
                                 <ComboBox fx:id="filterStatus" layoutX="14.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filder Order Status" />
                                 <ComboBox fx:id="filterClients" layoutX="173.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filter Clients" />
-                                <ListView fx:id="foodList" layoutX="417.0" layoutY="67.0" prefHeight="200.0" prefWidth="220.0" AnchorPane.leftAnchor="417.0" AnchorPane.rightAnchor="186.0" />
+                                <ListView fx:id="foodList" layoutX="412.0" layoutY="74.0" prefHeight="360.0" prefWidth="220.0" AnchorPane.leftAnchor="412.0" AnchorPane.rightAnchor="191.0" />
                                 <Button layoutX="649.0" layoutY="242.0" mnemonicParsing="false" onAction="#loadChatForm" text="View chat" />
                         <DatePicker fx:id="dateFilterFrom" layoutX="498.0" layoutY="21.0" prefHeight="25.0" prefWidth="150.0" />
                         <DatePicker fx:id="DateFilterTo" layoutX="660.0" layoutY="21.0" prefHeight="25.0" prefWidth="154.0" />
                         <ComboBox fx:id="filterRestaurants" layoutX="337.0" layoutY="21.0" onAction="#filterOrders" prefWidth="150.0" promptText="Filter Restaurants" />
+                        <Text layoutX="14.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Orders" />
+                        <Text layoutX="14.0" layoutY="302.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Clients" />
+                        <Text layoutX="412.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Food" />
                             </children></AnchorPane>
                     </content>
                 </Tab>
@@ -118,7 +121,7 @@
                                         </ContextMenu>
                                     </contextMenu>
                                 </ListView>
-                                <ListView fx:id="chatMessages" layoutX="238.0" layoutY="22.0" prefHeight="407.0" prefWidth="185.0">
+                                <ListView fx:id="chatMessages" layoutX="238.0" layoutY="22.0" prefHeight="290.0" prefWidth="435.0">
                                     <contextMenu>
                                         <ContextMenu>
                                             <items>
@@ -127,10 +130,13 @@
                                         </ContextMenu>
                                     </contextMenu>
                                 </ListView>
-                        <TextArea fx:id="chatMessageBody" layoutX="443.0" layoutY="33.0" prefHeight="200.0" prefWidth="185.0" promptText="type a reply..." />
-                        <Button fx:id="sendChatMessage" layoutX="443.0" layoutY="253.0" mnemonicParsing="false" onAction="#sendChatMessage" prefHeight="25.0" prefWidth="101.0" text="Send message" />
-                        <Button fx:id="deleteChat" layoutX="443.0" layoutY="328.0" mnemonicParsing="false" onAction="#deleteChat" prefHeight="25.0" prefWidth="101.0" text="Delete chat" />
-                        <Button fx:id="deleteMessage" layoutX="443.0" layoutY="290.0" mnemonicParsing="false" onAction="#deleteMessage" text="Delete Message" />
+                        <TextArea fx:id="chatMessageBody" layoutX="238.0" layoutY="332.0" prefHeight="85.0" prefWidth="433.0" promptText="type a reply..." />
+                        <Button fx:id="sendChatMessage" layoutX="703.0" layoutY="312.0" mnemonicParsing="false" onAction="#sendChatMessage" prefHeight="25.0" prefWidth="101.0" text="Send message" />
+                        <Button fx:id="deleteChat" layoutX="703.0" layoutY="387.0" mnemonicParsing="false" onAction="#deleteChat" prefHeight="25.0" prefWidth="101.0" text="Delete chat" />
+                        <Button fx:id="deleteMessage" layoutX="703.0" layoutY="349.0" mnemonicParsing="false" onAction="#deleteMessage" text="Delete Message" />
+                        <Button fx:id="logoutButton" layoutX="753.0" layoutY="23.0" mnemonicParsing="false" onAction="#logout" text="Log out" />
+                        <Text layoutX="14.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Orders" />
+                        <Text layoutX="238.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Chat" />
                             </children>
                         </AnchorPane>
                     </content>

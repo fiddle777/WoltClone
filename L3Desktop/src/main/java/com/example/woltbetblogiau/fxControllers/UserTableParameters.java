@@ -13,6 +13,25 @@ public class UserTableParameters {
     private SimpleStringProperty phoneNum = new SimpleStringProperty();
     private SimpleStringProperty address = new SimpleStringProperty();
 
+    public UserTableParameters(int id,
+                               String typeLabel,
+                               String login,
+                               String password,
+                               String name,
+                               String surname,
+                               String phone,
+                               String address) {
+        this.id.set(id);
+        this.userType.set(typeLabel);
+        this.login.set(login);
+        this.password.set(password);
+        this.name.set(name);
+        this.surname.set(surname);
+        this.phoneNum.set(phone);
+        this.address.set(address);
+    }
+
+
     public int getId() {
         return id.get();
     }
@@ -93,7 +112,7 @@ public class UserTableParameters {
         return phoneNum;
     }
 
-    public void setPhoneNum(String phoneNum) {
+    public void setPhoneNumber(String phoneNum) {
         this.phoneNum.set(phoneNum);
     }
 
@@ -107,5 +126,9 @@ public class UserTableParameters {
 
     public void setAddress(String address) {
         this.address.set(address);
+    }
+
+    public String getPhoneNumber() {
+        return phoneNum.get();
     }
 }

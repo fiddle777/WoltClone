@@ -59,6 +59,11 @@ public class MainForm implements Initializable {
     public TableColumn<UserTableParameters, String> addrCol;
     @FXML
     public TableColumn<UserTableParameters, Void> dummyCol;
+    @FXML
+    private Button deleteChatButton;
+
+    @FXML
+    private Button deleteMessageButton;
     private ObservableList<UserTableParameters> data = FXCollections.observableArrayList();
     //</editor-fold>
     //<editor-fold desc="Order Tab Elements">
@@ -94,6 +99,12 @@ public class MainForm implements Initializable {
     private EntityManagerFactory entityManagerFactory;
     private CustomHibernate customHibernate;
     private User currentUser;
+    @FXML
+    private TextField userSearchField;
+    @FXML
+    private ComboBox<String> userSearchTypeCombo;
+    private List<UserTableParameters> allUsersCache = new ArrayList<>();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         userTable.setItems(data);
@@ -269,24 +280,30 @@ public class MainForm implements Initializable {
         boolean isAdmin = currentUser.isAdmin();
 
         if (isAdmin) {
-            // admin fill access
+            // admin full access
             if (userTab != null) userTab.setDisable(false);
             if (managementTab != null) managementTab.setDisable(false);
             if (foodTab != null) foodTab.setDisable(false);
             if (chatTab != null) chatTab.setDisable(false);
+
+            if (deleteChatButton != null) deleteChatButton.setDisable(false);
+            if (deleteMessageButton != null) deleteMessageButton.setDisable(false);
             return;
         }
 
         if (isRestaurant) {
-            // Restaurant
+            // Restaurant perms
             if (userTab != null) userTab.setDisable(true);
             if (managementTab != null) managementTab.setDisable(false);
             if (foodTab != null) foodTab.setDisable(false);
             if (chatTab != null) chatTab.setDisable(false);
+
+            if (deleteChatButton != null) deleteChatButton.setDisable(true);
+            if (deleteMessageButton != null) deleteMessageButton.setDisable(true);
             return;
         }
 
-        // Safety net
+        // fallback
         new Alert(Alert.AlertType.ERROR,
                 "Only administrators and restaurant accounts can use the desktop application.")
                 .showAndWait();
@@ -296,6 +313,7 @@ public class MainForm implements Initializable {
         }
     }
 
+
     //<editor-fold desc="User Tab functionality">
     public void reloadTableData() {
         if(customHibernate == null) {
@@ -303,27 +321,23 @@ public class MainForm implements Initializable {
         }
         try {
             if (userTab.isSelected()) {
-                List<UserTableParameters> rows = new ArrayList<>();
-                List<User> users = customHibernate.getAllRecords(User.class);
-                for (User u : users) {
-                    UserTableParameters utp = new UserTableParameters();
-                    utp.setId(u.getId());
-                    utp.setUserType(u.getClass().getSimpleName());
-                    utp.setLogin(u.getLogin());
-                    utp.setPassword(u.getPassword());
-                    utp.setName(u.getName());
-                    utp.setSurname(u.getSurname());
-                    utp.setPhoneNum(u.getPhoneNumber());
-                    if (u instanceof BasicUser) {
-                        utp.setAddress(((BasicUser) u).getAddress());
-                    }
-                    if (u instanceof Restaurant) {
-                    }
-                    if (u instanceof Driver) {
-                    }
-                    rows.add(utp);
+                // Load all users once into cache
+                List<User> allUsers = customHibernate.getAllRecords(User.class);
+                allUsersCache = mapUsersToParams(allUsers);
+                userTable.getItems().setAll(allUsersCache);
+                // Isearch type combo init
+                if (userSearchTypeCombo != null && userSearchTypeCombo.getItems().isEmpty()) {
+                    userSearchTypeCombo.getItems().addAll(
+                            "Login",
+                            "Name",
+                            "Surname",
+                            "Phone"
+                    );
+                    userSearchTypeCombo.getSelectionModel().select("Login");
                 }
-                data.setAll(rows);
+                if (userSearchField != null) {
+                    userSearchField.clear();
+                }
             } else if (managementTab.isSelected()) {
                 helperPopulateManagementTab();
             } else if (foodTab.isSelected()) {
@@ -982,7 +996,112 @@ public class MainForm implements Initializable {
         chatMessageBody.clear();
         chatMessages.getItems().setAll(customHibernate.getChatMessages(selectedChat));
     }
+    private List<UserTableParameters> mapUsersToParams(List<User> users) {
+        List<UserTableParameters> result = new ArrayList<>();
+        if (users == null) return result;
+
+        for (User u : users) {
+            if (u == null) continue;
+
+            String typeLabel = u.getClass().getSimpleName();
+            String address = null;
+            if (u instanceof BasicUser basic) {
+                address = basic.getAddress();
+            }
+            String phone = u.getPhoneNumber();
+
+            UserTableParameters row = new UserTableParameters(
+                    u.getId(),
+                    typeLabel,
+                    u.getLogin(),
+                    u.getPassword(),
+                    u.getName(),
+                    u.getSurname(),
+                    phone,
+                    address
+            );
+            result.add(row);
+        }
+        return result;
+    }
+
+    @FXML
+    private void searchUsers() {
+        if (allUsersCache == null || allUsersCache.isEmpty()) {
+            return;
+        }
+
+        String term = userSearchField != null ? userSearchField.getText() : "";
+        if (term == null || term.isBlank()) {
+            // If no search text, show all
+            userTable.getItems().setAll(allUsersCache);
+            return;
+        }
+
+        String searchType = userSearchTypeCombo != null
+                ? userSearchTypeCombo.getSelectionModel().getSelectedItem()
+                : "Login";
+
+        String lowerTerm = term.toLowerCase();
+
+        List<UserTableParameters> filtered = allUsersCache.stream()
+                .filter(u -> matchesUserFilter(u, searchType, lowerTerm))
+                .toList();
+
+        userTable.getItems().setAll(filtered);
+    }
+
+    @FXML
+    private void clearUserSearch() {
+        if (userSearchField != null) {
+            userSearchField.clear();
+        }
+        if (userSearchTypeCombo != null && userSearchTypeCombo.getItems().size() > 0) {
+            userSearchTypeCombo.getSelectionModel().select("Login");
+        }
+        // Reset table to all users
+        if (allUsersCache != null) {
+            userTable.getItems().setAll(allUsersCache);
+        }
+    }
+    private boolean matchesUserFilter(UserTableParameters u, String searchType, String lowerTerm) {
+        if (u == null) return false;
+
+        return switch (searchType) {
+            case "Login" -> containsIgnoreCase(u.getLogin(), lowerTerm);
+            case "Name" -> containsIgnoreCase(u.getName(), lowerTerm);
+            case "Surname" -> containsIgnoreCase(u.getSurname(), lowerTerm);
+            case "Phone" -> containsIgnoreCase(u.getPhoneNumber(), lowerTerm);
+            default -> false;
+        };
+    }
 
 
+    private boolean containsIgnoreCase(String value, String lowerTerm) {
+        if (value == null) return false;
+        return value.toLowerCase().contains(lowerTerm);
+    }
+
+    @FXML
+    public void logout() {
+        try {
+            // Close current window
+            Stage stage = (Stage) tabsPane.getScene().getWindow();
+            stage.close();
+
+            // Reopen login form
+            FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("login-form.fxml"));
+            Parent root = fxmlLoader.load();
+
+            Stage loginStage = new Stage();
+            loginStage.setScene(new Scene(root));
+            loginStage.setTitle("Login");
+            loginStage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Failed to log out: " + e.getMessage()).showAndWait();
+        }
+    }
 
 }
