@@ -9,6 +9,10 @@ public class FoodOrder {
     private String dateCreated;
     private String status;
 
+    private String buyerName;
+    private String buyerPhone;
+    private String buyerAddress;
+
     public FoodOrder(int id, String name, Double price) {
         this.id = id;
         this.name = name;
@@ -55,4 +59,28 @@ public class FoodOrder {
     }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getBuyerName() {
+        return buyerName;
+    }
+
+    public void setBuyerName(String buyerName) {
+        this.buyerName = buyerName;
+    }
+
+    public String getBuyerPhone() {
+        return buyerPhone;
+    }
+
+    public void setBuyerPhone(String buyerPhone) {
+        this.buyerPhone = buyerPhone;
+    }
+
+    public String getBuyerAddress() {
+        return buyerAddress;
+    }
+
+    public void setBuyerAddress(String buyerAddress) {
+        this.buyerAddress = buyerAddress;
+    }
 }

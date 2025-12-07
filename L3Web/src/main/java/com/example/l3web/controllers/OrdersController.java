@@ -120,6 +120,10 @@ public class OrdersController {
         order.setRestaurantName(restaurant.getName());
         order.setItemsSummary(summaryBuilder.toString());
 
+        order.setBuyerName(buyer.getName() + " " + buyer.getSurname());
+        order.setBuyerPhone(buyer.getPhoneNumber());
+        order.setBuyerAddress(buyer.getAddress());
+
         ordersRepo.save(order);
 
         Chat chat = new Chat("User " + buyer.getLogin(), "Chat order " + order.getId(), order);

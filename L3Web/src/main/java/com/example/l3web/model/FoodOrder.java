@@ -55,6 +55,10 @@ public class FoodOrder {
     @ManyToOne
     private Driver driver;
 
+    private String buyerName;
+    private String buyerPhone;
+    private String buyerAddress;
+
     @PrePersist
     protected void onCreate() {
         dateCreated = LocalDateTime.now();

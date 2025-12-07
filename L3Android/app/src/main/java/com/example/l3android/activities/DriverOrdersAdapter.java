@@ -84,6 +84,7 @@ public class DriverOrdersAdapter extends ArrayAdapter<FoodOrder> {
 
             // Details: restaurant + items
             StringBuilder detailsBuilder = new StringBuilder();
+
             if (order.getRestaurantName() != null && !order.getRestaurantName().isEmpty()) {
                 detailsBuilder.append(order.getRestaurantName());
             }
@@ -93,6 +94,38 @@ public class DriverOrdersAdapter extends ArrayAdapter<FoodOrder> {
                 }
                 detailsBuilder.append(order.getItemsSummary());
             }
+
+            String buyerName = order.getBuyerName();
+            String buyerPhone = order.getBuyerPhone();
+            String buyerAddress = order.getBuyerAddress();
+
+            boolean hasBuyerInfo =
+                    (buyerName != null && !buyerName.isEmpty()) ||
+                            (buyerPhone != null && !buyerPhone.isEmpty()) ||
+                            (buyerAddress != null && !buyerAddress.isEmpty());
+
+            if (hasBuyerInfo) {
+                if (detailsBuilder.length() > 0) {
+                    detailsBuilder.append("\n");
+                }
+
+                boolean firstPiece = true;
+
+                if (buyerName != null && !buyerName.isEmpty()) {
+                    detailsBuilder.append("Client: ").append(buyerName);
+                    firstPiece = false;
+                }
+                if (buyerPhone != null && !buyerPhone.isEmpty()) {
+                    if (!firstPiece) detailsBuilder.append(" | ");
+                    detailsBuilder.append("☎ ").append(buyerPhone);
+                    firstPiece = false;
+                }
+                if (buyerAddress != null && !buyerAddress.isEmpty()) {
+                    if (!firstPiece) detailsBuilder.append(" | ");
+                    detailsBuilder.append(buyerAddress);
+                }
+            }
+
             details.setText(detailsBuilder.toString());
 
             if (order.getStatus() != null) {
@@ -108,7 +141,6 @@ public class DriverOrdersAdapter extends ArrayAdapter<FoodOrder> {
                 price.setText("Price: N/A");
             }
 
-            // Mode-specific button behavior
             if (mode == Mode.MY_DELIVERIES) {
                 setupMarkDeliveredButton(order, actionButton);
             } else {
@@ -120,7 +152,7 @@ public class DriverOrdersAdapter extends ArrayAdapter<FoodOrder> {
     }
 
     private void setupMarkDeliveredButton(FoodOrder order, Button btn) {
-        // Already delivered -> disabled
+        // Already delivered = disabled
         if ("DELIVERED".equalsIgnoreCase(order.getStatus())) {
             btn.setText("Delivered");
             btn.setEnabled(false);
