@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
 public class DriverOrdersActivity extends AppCompatActivity {
 
     private int driverId;
     private ListView listView;
     private Driver currentDriver;
+    private List<FoodOrder> orders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +60,12 @@ public class DriverOrdersActivity extends AppCompatActivity {
 
         String userJson = intent.getStringExtra("userJsonObject");
         if (userJson != null) {
-            currentDriver = new Gson().fromJson(userJson, Driver.class);
+            Gson gson = new Gson();
+            currentDriver = gson.fromJson(userJson, Driver.class);
         }
 
         loadOrders();
     }
-
 
     @Override
     protected void onResume() {
@@ -85,11 +85,34 @@ public class DriverOrdersActivity extends AppCompatActivity {
                 handler.post(() -> {
                     try {
                         Type listType = new TypeToken<List<FoodOrder>>() {}.getType();
-                        List<FoodOrder> orders = new Gson().fromJson(response, listType);
 
-                        DriverOrdersAdapter adapter = new DriverOrdersAdapter(this, orders, DriverOrdersAdapter.Mode.MY_DELIVERIES,
-                                driverId);
+                        orders = new Gson().fromJson(response, listType);
+
+                        DriverOrdersAdapter adapter = new DriverOrdersAdapter(
+                                this,
+                                orders,
+                                DriverOrdersAdapter.Mode.MY_DELIVERIES,
+                                driverId
+                        );
                         listView.setAdapter(adapter);
+
+                        listView.setOnItemClickListener((parent, view, position, id) -> {
+                            if (orders == null || position < 0 || position >= orders.size()) {
+                                return;
+                            }
+
+                            FoodOrder selected = orders.get(position);
+                            if (selected == null) return;
+
+                            Intent chatIntent = new Intent(DriverOrdersActivity.this, ChatSystem.class);
+                            chatIntent.putExtra("orderId", selected.getId());
+                            chatIntent.putExtra("userId", driverId);
+                            if (currentDriver != null) {
+                                chatIntent.putExtra("userLogin", currentDriver.getLogin());
+                            }
+                            startActivity(chatIntent);
+                        });
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -100,6 +123,7 @@ public class DriverOrdersActivity extends AppCompatActivity {
             }
         });
     }
+
     public void viewMyAccount(View view) {
         Intent parentIntent = getIntent();
         String userInfo = parentIntent.getStringExtra("userJsonObject");
@@ -110,4 +134,3 @@ public class DriverOrdersActivity extends AppCompatActivity {
     }
 
 }
-

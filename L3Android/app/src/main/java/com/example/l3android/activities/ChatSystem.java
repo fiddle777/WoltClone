@@ -1,7 +1,6 @@
 package com.example.l3android.activities;
 
 import static com.example.l3android.Utils.Constants.GET_MESSAGES_BY_ORDER;
-import static com.example.l3android.Utils.Constants.GET_ORDERS_BY_USER;
 import static com.example.l3android.Utils.Constants.SEND_MESSAGE;
 
 import android.content.Intent;
@@ -39,6 +38,7 @@ public class ChatSystem extends AppCompatActivity {
 
     private int orderId;
     private int userId;
+    private String userLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +50,23 @@ public class ChatSystem extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        //Noriu uzkrauti zinutes konkreciam klientui
 
         Intent intent = getIntent();
-        orderId = intent.getIntExtra("orderId", 0);
-        userId = intent.getIntExtra("userId", 0);
+        orderId = intent.getIntExtra("orderId", -1);
+        userId = intent.getIntExtra("userId", -1);
+        userLogin = intent.getStringExtra("userLogin");
+
+        // optional header
+        TextView header = findViewById(R.id.chatHeader);
+        if (header != null) {
+            if (orderId != -1) {
+                header.setText("Chat for order #" + orderId);
+            } else {
+                header.setText("Chat");
+            }
+        }
 
         loadMessages();
-
     }
 
     private void loadMessages() {
@@ -74,11 +83,12 @@ public class ChatSystem extends AppCompatActivity {
                             GsonBuilder gsonBuilder = new GsonBuilder();
                             gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
                             Gson gsonMessages = gsonBuilder.setPrettyPrinting().create();
-                            Type messagesListType = new TypeToken<List<Review>>() {
-                            }.getType();
+                            Type messagesListType = new TypeToken<List<Review>>() {}.getType();
                             List<Review> messagesListFromJson = gsonMessages.fromJson(response, messagesListType);
                             ListView messagesListElement = findViewById(R.id.messageList);
-                            ArrayAdapter<Review> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messagesListFromJson);
+                            ArrayAdapter<Review> adapter = new ArrayAdapter<>(this,
+                                    android.R.layout.simple_list_item_1,
+                                    messagesListFromJson);
                             messagesListElement.setAdapter(adapter);
                         }
                     } catch (Exception e) {
@@ -123,8 +133,5 @@ public class ChatSystem extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
         });
-
-
     }
 }
-

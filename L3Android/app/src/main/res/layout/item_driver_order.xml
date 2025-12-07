@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="12dp"
+    android:id="@+id/driverOrderRoot"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:clickable="false"
+    android:focusable="false"
+    android:descendantFocusability="blocksDescendants">
 
     <TextView
         android:id="@+id/driverOrderTitle"
@@ -45,6 +49,7 @@
         android:id="@+id/driverOrderCompleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mark delivered"
-        android:layout_marginTop="8dp"/>
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:text="Mark delivered" />
 </LinearLayout>
