@@ -20,11 +20,16 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.l3android.R;
 import com.example.l3android.Utils.RestOperations;
+import com.example.l3android.model.BasicUser;
+import com.example.l3android.model.Driver;
+import com.example.l3android.model.User;
+import com.example.l3android.model.VehicleType;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 String response = RestOperations.sendPost(VALIDATE_USER_URL, info);
 
                 handler.post(() -> {
-                    // Network / server error
+                    // Network error
                     if (response == null || response.isEmpty() || "Error".equals(response)) {
                         Toast.makeText(MainActivity.this,
                                 "Server error. Try again.",
@@ -69,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     JsonObject userJson = new JsonParser().parse(response).getAsJsonObject();
+                    String userType = userJson.get("userType").getAsString();
+                    User currentUser;
 
                     // Read status from backend
                     String status = userJson.has("status") && !userJson.get("status").isJsonNull()
@@ -89,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    String userType = userJson.get("userType").getAsString();
-
                     boolean isDriver = userType.equals("com.example.l3web.model.Driver");
                     boolean isBasicUser = userType.equals("com.example.l3web.model.BasicUser");
                     boolean isRestaurant = userType.equals("com.example.l3web.model.Restaurant");
@@ -98,7 +103,86 @@ public class MainActivity extends AppCompatActivity {
                             + ", isBasicUser=" + isBasicUser
                             + ", isRestaurant=" + isRestaurant);
 
-                    // Block restaurants
+                    // building curretn user here
+
+                    int id = userJson.get("id").getAsInt();
+
+                    String loginStr   = userJson.has("login")   && !userJson.get("login").isJsonNull()
+                            ? userJson.get("login").getAsString()
+                            : null;
+                    String nameStr    = userJson.has("name")    && !userJson.get("name").isJsonNull()
+                            ? userJson.get("name").getAsString()
+                            : null;
+                    String surnameStr = userJson.has("surname") && !userJson.get("surname").isJsonNull()
+                            ? userJson.get("surname").getAsString()
+                            : null;
+                    String phoneStr   = userJson.has("phoneNumber") && !userJson.get("phoneNumber").isJsonNull()
+                            ? userJson.get("phoneNumber").getAsString()
+                            : null;
+
+                    String addressStr = userJson.has("address") && !userJson.get("address").isJsonNull()
+                            ? userJson.get("address").getAsString()
+                            : null;
+                    String licenceStr = userJson.has("licence") && !userJson.get("licence").isJsonNull()
+                            ? userJson.get("licence").getAsString()
+                            : null;
+                    String bDateStr = userJson.has("bDate") && !userJson.get("bDate").isJsonNull()
+                            ? userJson.get("bDate").getAsString()
+                            : null;
+                    String vehicleTypeStr = userJson.has("vehicleType") && !userJson.get("vehicleType").isJsonNull()
+                            ? userJson.get("vehicleType").getAsString()
+                            : null;
+
+                    if (isDriver) {
+                        Driver d = new Driver();
+                        d.setId(id);
+                        d.setLogin(loginStr);
+                        d.setName(nameStr);
+                        d.setSurname(surnameStr);
+                        d.setPhoneNumber(phoneStr);
+                        d.setAddress(addressStr);
+                        d.setLicence(licenceStr);
+
+                        // oh the sweet release of death
+                        if (bDateStr != null && !bDateStr.isEmpty()) {
+                            try {
+                                d.setbDate(bDateStr);
+                            } catch (Exception e) {
+                                Log.e("ACHTUNG_BDATE_PARSE", "Failed to parse bDate: " + bDateStr, e);
+                            }
+                        }
+
+                        if (vehicleTypeStr != null && !vehicleTypeStr.isEmpty()) {
+                            try {
+                                d.setVehicleType(VehicleType.valueOf(vehicleTypeStr));
+                            } catch (IllegalArgumentException e) {
+                                Log.e("ACHTUNG_VEHICLE_PARSE", "Unknown vehicle type: " + vehicleTypeStr, e);
+                            }
+                        }
+
+                        currentUser = d;
+
+                    } else if (isBasicUser) {
+                        BasicUser bu = new BasicUser();
+                        bu.setId(id);
+                        bu.setLogin(loginStr);
+                        bu.setName(nameStr);
+                        bu.setSurname(surnameStr);
+                        bu.setPhoneNumber(phoneStr);
+                        bu.setAddress(addressStr);
+                        currentUser = bu;
+
+                    } else {
+                        User u = new User();
+                        u.setId(id);
+                        u.setLogin(loginStr);
+                        u.setName(nameStr);
+                        u.setSurname(surnameStr);
+                        u.setPhoneNumber(phoneStr);
+                        currentUser = u;
+                    }
+
+                    // block restaurants
                     if (isRestaurant) {
                         Toast.makeText(MainActivity.this,
                                 "Restaurant accounts can only use the desktop application.",
@@ -106,16 +190,18 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Driver vs normal user nav
+                    // driver vs normal user nav
                     if (isDriver) {
                         Log.d("POPLIASOIFUAOISUFONavigation", "Navigating to DriverOrdersActivity");
                         Intent intent = new Intent(MainActivity.this, DriverOrdersActivity.class);
                         intent.putExtra("userJsonObject", response);
                         intent.putExtra("driverId", userJson.get("id").getAsInt());
+                        intent.putExtra("currentUser", currentUser); // <--- important
                         startActivity(intent);
                     } else {
                         Intent intent = new Intent(MainActivity.this, WoltRestaurants.class);
                         intent.putExtra("userJsonObject", response);
+                        intent.putExtra("currentUser", currentUser); // <--- important
                         startActivity(intent);
                     }
                 });

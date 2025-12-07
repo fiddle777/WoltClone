@@ -81,6 +81,26 @@ public class UserController {
         jsonObject.addProperty("surname", userByLogin.getSurname());
         jsonObject.addProperty("id", userByLogin.getId());
 
+        if (userByLogin instanceof BasicUser basic) {
+            jsonObject.addProperty("address",
+                    basic.getAddress() != null ? basic.getAddress() : null);
+        }
+
+        if (userByLogin.getPhoneNumber() != null) {
+            jsonObject.addProperty("phoneNumber", userByLogin.getPhoneNumber());
+        } else {
+            jsonObject.add("phoneNumber", null);
+        }
+
+        if (userByLogin instanceof Driver driver) {
+            jsonObject.addProperty("licence",
+                    driver.getLicence() != null ? driver.getLicence() : null);
+            jsonObject.addProperty("bDate",
+                    driver.getBDate() != null ? driver.getBDate().toString() : null);
+            jsonObject.addProperty("vehicleType",
+                    driver.getVehicleType() != null ? driver.getVehicleType().name() : null);
+        }
+
         return gson.toJson(jsonObject);
     }
 
@@ -160,6 +180,13 @@ public class UserController {
         if (json.has("phoneNumber")) {
             user.setPhoneNumber(json.get("phoneNumber").getAsString());
         }
+        if (json.has("login")) {
+            user.setLogin(json.get("login").getAsString());
+        }
+        if (json.has("password")) {
+            user.setPassword(json.get("password").getAsString());
+        }
+
 
         // BasicUser fields
         if (user instanceof BasicUser basicUser) {
