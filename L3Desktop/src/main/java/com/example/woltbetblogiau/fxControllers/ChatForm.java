@@ -31,7 +31,6 @@ public class ChatForm implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Simple text rendering for messages
         messageList.setCellFactory(listView -> new javafx.scene.control.ListCell<>() {
             @Override
             protected void updateItem(Review item, boolean empty) {
@@ -40,37 +39,48 @@ public class ChatForm implements Initializable {
                     setText(null);
                 } else {
                     StringBuilder sb = new StringBuilder();
+
+                    String author = item.getAuthorLabel();
+                    String time   = item.getTimeLabel();
+
+                    if (author != null && !author.isBlank()) {
+                        sb.append("[")
+                                .append(author);
+                        if (time != null && !time.isBlank()) {
+                            sb.append(" @ ").append(time);
+                        }
+                        sb.append("] ");
+                    }
+
                     if (item.getReviewText() != null) {
                         sb.append(item.getReviewText());
                     }
+
                     if (item.getDateCreated() != null) {
                         sb.append(" (")
                                 .append(item.getDateCreated().format(DateTimeFormatter.ISO_DATE))
                                 .append(")");
                     }
+
                     setText(sb.toString());
                 }
             }
         });
     }
 
-    /**
-     * Called by MainForm after loading FXML.
-     */
+
     public void setData(EntityManagerFactory emf, User currentUser, FoodOrder order) {
         this.entityManagerFactory = emf;
         this.customHibernate = new CustomHibernate(entityManagerFactory);
         this.currentUser = currentUser;
         this.currentFoodOrder = order;
 
-        // Ensure the order & chat are up-to-date
         FoodOrder managedOrder =
                 customHibernate.getEntityById(FoodOrder.class, currentFoodOrder.getId());
         this.currentFoodOrder = managedOrder;
         this.currentChat = managedOrder.getChat();
 
         if (this.currentChat == null) {
-            // First message will create the chat on send
             messageList.setItems(FXCollections.observableArrayList());
         } else {
             loadMessages();
@@ -92,18 +102,15 @@ public class ChatForm implements Initializable {
             return;
         }
 
-        // Ensure chat exists
         if (currentFoodOrder.getChat() == null) {
             Chat chat = new Chat("Chat for order " + currentFoodOrder.getId(), currentFoodOrder);
             customHibernate.create(chat);
-            // Reload order to attach new chat
             currentFoodOrder =
                     customHibernate.getEntityById(FoodOrder.class, currentFoodOrder.getId());
         }
 
         currentChat = currentFoodOrder.getChat();
 
-        // For now we only allow BasicUser as the "commentOwner"
         BasicUser sender = null;
         if (currentUser instanceof BasicUser) {
             sender = (BasicUser) currentUser;

@@ -10,6 +10,9 @@ public class Review {
     private int rating;
     private String reviewText;
     private LocalDate dateCreated;
+    private String authorLabel;
+    private String timeLabel;
+
 
     public Review(int id, int rating, String reviewText, LocalDate dateCreated) {
         this.id = id;
@@ -59,9 +62,45 @@ public class Review {
 
     @Override
     public String toString() {
-        if (dateCreated != null) {
-            return reviewText + " (" + dateCreated + ")";
+        StringBuilder sb = new StringBuilder();
+
+        if (authorLabel != null && !authorLabel.isEmpty()) {
+            sb.append("[")
+                    .append(authorLabel);
+            if (timeLabel != null && !timeLabel.isEmpty()) {
+                sb.append(" @ ").append(timeLabel);
+            }
+            sb.append("] ");
         }
-        return reviewText != null ? reviewText : "";
+
+        if (reviewText != null && !reviewText.isEmpty()) {
+            sb.append(reviewText);
+        }
+
+        if (dateCreated != null) {
+            sb.append(" (").append(dateCreated).append(")");
+        }
+
+        if (sb.length() == 0 && reviewText != null) {
+            return reviewText;
+        }
+        return sb.toString();
+    }
+
+
+    public String getTimeLabel() {
+        return timeLabel;
+    }
+
+    public void setTimeLabel(String timeLabel) {
+        this.timeLabel = timeLabel;
+    }
+
+    public String getAuthorLabel() {
+        return authorLabel;
+    }
+
+    public void setAuthorLabel(String authorLabel) {
+        this.authorLabel = authorLabel;
     }
 }

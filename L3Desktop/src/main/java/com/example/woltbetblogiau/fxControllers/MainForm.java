@@ -26,6 +26,7 @@ import javafx.scene.control.Alert;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -256,6 +257,43 @@ public class MainForm implements Initializable {
                 setText(it.getName() + " • " + it.getPrice());
             }
         });
+        if (chatMessages != null) {
+            chatMessages.setCellFactory(listView -> new javafx.scene.control.ListCell<Review>() {
+                @Override
+                protected void updateItem(Review item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        StringBuilder sb = new StringBuilder();
+
+                        String author = item.getAuthorLabel();
+                        String time   = item.getTimeLabel();
+
+                        if (author != null && !author.isBlank()) {
+                            sb.append("[")
+                                    .append(author);
+                            if (time != null && !time.isBlank()) {
+                                sb.append(" @ ").append(time);
+                            }
+                            sb.append("] ");
+                        }
+
+                        if (item.getReviewText() != null) {
+                            sb.append(item.getReviewText());
+                        }
+
+                        if (item.getDateCreated() != null) {
+                            sb.append(" (")
+                                    .append(item.getDateCreated().format(DateTimeFormatter.ISO_DATE))
+                                    .append(")");
+                        }
+
+                        setText(sb.toString());
+                    }
+                }
+            });
+        }
 
         cuisineList.getSelectionModel().selectedItemProperty().addListener((obs, oldCuisine, newCuisine) -> {
             loadCuisineInfo();
