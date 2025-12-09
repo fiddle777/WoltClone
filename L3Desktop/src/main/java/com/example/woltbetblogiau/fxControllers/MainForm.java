@@ -318,7 +318,6 @@ public class MainForm implements Initializable {
         boolean isAdmin = currentUser.isAdmin();
 
         if (isAdmin) {
-            // admin full access
             if (userTab != null) userTab.setDisable(false);
             if (managementTab != null) managementTab.setDisable(false);
             if (foodTab != null) foodTab.setDisable(false);
@@ -326,18 +325,26 @@ public class MainForm implements Initializable {
 
             if (deleteChatButton != null) deleteChatButton.setDisable(false);
             if (deleteMessageButton != null) deleteMessageButton.setDisable(false);
+
+            if (tabsPane != null && userTab != null) {
+                tabsPane.getSelectionModel().select(userTab);
+            }
             return;
         }
 
         if (isRestaurant) {
-            // Restaurant perms
+
             if (userTab != null) userTab.setDisable(true);
             if (managementTab != null) managementTab.setDisable(false);
             if (foodTab != null) foodTab.setDisable(false);
-            if (chatTab != null) chatTab.setDisable(false);
+            if (chatTab != null) chatTab.setDisable(true);   // ⚠️ chat greyed out
 
             if (deleteChatButton != null) deleteChatButton.setDisable(true);
             if (deleteMessageButton != null) deleteMessageButton.setDisable(true);
+
+            if (tabsPane != null && managementTab != null) {
+                tabsPane.getSelectionModel().select(managementTab);
+            }
             return;
         }
 
